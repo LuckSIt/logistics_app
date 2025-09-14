@@ -3,7 +3,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.routers import users  # импортируем router
-from backend.routers import auth, contractors, files, quotes, tariffs, reference, offers, currency, requests_history, discounts, text_extraction, auto_tariff, llm_parser, markups, request_history
+from backend.routers import auth, contractors, files, quotes, tariffs, reference, offers, currency, requests_history, discounts, text_extraction, auto_tariff, llm_parser, markups, request_history, stats
 from backend.database import Base, engine
 from backend import models
 
@@ -49,6 +49,7 @@ app.include_router(auto_tariff.router, prefix="/auto-tariff", tags=["Auto Tariff
 app.include_router(llm_parser.router, prefix="/llm-parser", tags=["LLM Parser"])
 app.include_router(markups.router, prefix="/markups", tags=["Markups"])
 app.include_router(request_history.router, prefix="/request-history", tags=["Request History"])
+app.include_router(stats.router, prefix="/stats", tags=["Statistics"])
 
 
 @app.get("/")

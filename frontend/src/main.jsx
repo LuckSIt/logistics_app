@@ -239,33 +239,41 @@ function Dashboard({ stats, user }) {
         <div className="stat-card">
           <div className="stat-icon">📊</div>
           <div className="stat-content">
-            <div className="stat-value">{stats.tariffs}</div>
+            <div className="stat-value">{stats.tariffs || 0}</div>
             <div className="stat-label">Тарифов в базе</div>
-            <div className="stat-trend">+12% за месяц</div>
+            <div className="stat-trend">
+              {stats.trends?.tariffs_this_month > 0 ? `+${stats.trends.tariffs_this_month} за месяц` : 'Нет изменений'}
+            </div>
           </div>
         </div>
         <div className="stat-card">
           <div className="stat-icon">🚀</div>
           <div className="stat-content">
-            <div className="stat-value">{stats.offers}</div>
+            <div className="stat-value">{stats.offers || 0}</div>
             <div className="stat-label">Коммерческих предложений</div>
-            <div className="stat-trend">+5% за неделю</div>
+            <div className="stat-trend">
+              {stats.trends?.offers_this_week > 0 ? `+${stats.trends.offers_this_week} за неделю` : 'Нет изменений'}
+            </div>
           </div>
         </div>
         <div className="stat-card">
           <div className="stat-icon">👥</div>
           <div className="stat-content">
-            <div className="stat-value">{stats.users}</div>
+            <div className="stat-value">{stats.suppliers || 0}</div>
             <div className="stat-label">Поставщиков</div>
-            <div className="stat-trend">+3 новых</div>
+            <div className="stat-trend">
+              {stats.trends?.new_suppliers_this_month > 0 ? `+${stats.trends.new_suppliers_this_month} новых` : 'Нет изменений'}
+            </div>
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon">⚡</div>
+          <div className="stat-icon">📋</div>
           <div className="stat-content">
-            <div className="stat-value">98%</div>
-            <div className="stat-label">Доступность системы</div>
-            <div className="stat-trend">Отлично</div>
+            <div className="stat-value">{stats.requests || 0}</div>
+            <div className="stat-label">Запросов</div>
+            <div className="stat-trend">
+              {stats.trends?.requests_this_month > 0 ? `+${stats.trends.requests_this_month} за месяц` : 'Нет изменений'}
+            </div>
           </div>
         </div>
       </div>
@@ -807,18 +815,37 @@ function Layout({ auth, children }) {
 
 function App() {
   const auth = useAuth()
-  const [stats, setStats] = React.useState({ tariffs: 0, offers: 0, users: 0 })
+  const [stats, setStats] = React.useState({ 
+    tariffs: 0, 
+    offers: 0, 
+    users: 0, 
+    suppliers: 0, 
+    requests: 0, 
+    trends: {} 
+  })
 
   React.useEffect(() => {
     const load = async () => {
       try {
         if (!auth.token) return
-        const [tariffs, suppliers] = await Promise.all([
-          axios.get('/tariffs/', { baseURL: API_BASE, headers: { Authorization: `Bearer ${auth.token}` }}),
-          axios.get('/suppliers/', { baseURL: API_BASE, headers: { Authorization: `Bearer ${auth.token}` }}),
-        ])
-        setStats({ tariffs: tariffs.data.length, offers: 0, users: suppliers.data.length })
-      } catch {}
+        const response = await axios.get('/stats/', { 
+          baseURL: API_BASE, 
+          headers: { Authorization: `Bearer ${auth.token}` } 
+        })
+        const data = response.data
+        setStats({ 
+          tariffs: data.tariffs,
+          offers: data.offers,
+          users: data.users,
+          suppliers: data.suppliers,
+          requests: data.requests,
+          trends: data.trends
+        })
+      } catch (err) {
+        console.error('Ошибка загрузки статистики:', err)
+        // Fallback к старым данным
+        setStats({ tariffs: 0, offers: 0, users: 0, suppliers: 0, requests: 0, trends: {} })
+      }
     }
     load()
   }, [auth.token])
