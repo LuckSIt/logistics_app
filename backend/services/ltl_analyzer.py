@@ -1,0 +1,404 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Специализированный анализатор для LTL тарифов
+"""
+
+import re
+from typing import Dict, List, Optional, Any
+from backend.services.adaptive_analyzer import analyze_tariff_text_adaptive
+
+class LTLAnalyzer:
+    """Специализированный анализатор для LTL тарифов."""
+    
+    def __init__(self):
+        # Специфичные для LTL паттерны
+        self.ltl_patterns = {
+            'routes': [
+                r'([А-Я][а-я]+)\s*[-→]\s*([А-Я][а-я]+)',  # Москва-Пекин
+                r'([А-Я][а-я]+)\s*TO\s*([А-Я][а-я]+)',    # Москва TO Пекин
+                r'([A-Z][a-z]+)\s*[-→]\s*([A-Z][a-z]+)',  # Beijing-Moscow
+                r'([A-Z][a-z]+)\s*TO\s*([A-Z][a-z]+)',    # Beijing TO Moscow
+                r'([A-Z][a-z]+)\s*-\s*([A-Z][a-z]+)',     # Beijing-Moscow
+                r'([A-Z]{3})\s*[-→]\s*([A-Z]{3})',        # PEK-MOS
+                r'([A-Z]{3})\s*TO\s*([A-Z]{3})',          # PEK TO MOS
+            ],
+            'prices': [
+                r'(\d+(?:\.\d+)?)\s*USD',
+                r'USD\s*(\d+(?:\.\d+)?)',
+                r'(\d+(?:\.\d+)?)\s*CNY',
+                r'(\d+(?:\.\d+)?)\s*RMB',
+                r'(\d+(?:\.\d+)?)\s*RUB',
+                r'(\d+(?:\.\d+)?)\s*₽',
+                r'(\d+(?:\.\d+)?)\s*USD/cbm',
+                r'(\d+(?:\.\d+)?)\s*USD/m3',
+                r'(\d+(?:\.\d+)?)\s*CNY/cbm',
+                r'(\d+(?:\.\d+)?)\s*CNY/m3',
+            ],
+            'ltl_keywords': [
+                r'LTL',
+                r'сборка',
+                r'сборный',
+                r'частичная',
+                r'partial',
+                r'consolidation',
+                r'groupage',
+                r'сборный груз',
+                r'частичная загрузка',
+            ],
+            'weights': [
+                r'(\d+(?:\.\d+)?)\s*kg',
+                r'(\d+(?:\.\d+)?)\s*KG',
+                r'(\d+(?:\.\d+)?)\s*kilograms',
+                r'(\d+(?:\.\d+)?)\s*tons',
+                r'(\d+(?:\.\d+)?)\s*tonnes',
+                r'(\d+(?:\.\d+)?)\s*cbm',
+                r'(\d+(?:\.\d+)?)\s*m3',
+            ]
+        }
+        
+        # LTL маршруты и города
+        self.ltl_routes = {
+            # Китайские города
+            'PEK': 'Пекин',
+            'Beijing': 'Пекин',
+            'CAN': 'Гуанчжоу',
+            'Guangzhou': 'Гуанчжоу',
+            'SHA': 'Шанхай',
+            'Shanghai': 'Шанхай',
+            'SZX': 'Шэньчжэнь',
+            'Shenzhen': 'Шэньчжэнь',
+            'CTU': 'Чэнду',
+            'Chengdu': 'Чэнду',
+            'XIY': 'Сиань',
+            'Xian': 'Сиань',
+            'CKG': 'Чунцин',
+            'Chongqing': 'Чунцин',
+            'HGH': 'Ханчжоу',
+            'Hangzhou': 'Ханчжоу',
+            'NGB': 'Нинбо',
+            'Ningbo': 'Нинбо',
+            'TAO': 'Циндао',
+            'Qingdao': 'Циндао',
+            'DLC': 'Далянь',
+            'Dalian': 'Далянь',
+            'TSN': 'Тяньцзинь',
+            'Tianjin': 'Тяньцзинь',
+            'XMN': 'Сямэнь',
+            'Xiamen': 'Сямэнь',
+            'WUH': 'Ухань',
+            'Wuhan': 'Ухань',
+            'NKG': 'Нанкин',
+            'Nanjing': 'Нанкин',
+            'HKG': 'Гонконг',
+            'Hong Kong': 'Гонконг',
+            'MFM': 'Макао',
+            'Macau': 'Макао',
+            
+            # Российские города
+            'MOS': 'Москва',
+            'Moscow': 'Москва',
+            'SPB': 'Санкт-Петербург',
+            'St. Petersburg': 'Санкт-Петербург',
+            'VVO': 'Владивосток',
+            'Vladivostok': 'Владивосток',
+            'KRR': 'Краснодар',
+            'Krasnodar': 'Краснодар',
+            'ROV': 'Ростов-на-Дону',
+            'Rostov': 'Ростов-на-Дону',
+            'SVX': 'Екатеринбург',
+            'Yekaterinburg': 'Екатеринбург',
+            'OVB': 'Новосибирск',
+            'Novosibirsk': 'Новосибирск',
+            'KJA': 'Красноярск',
+            'Krasnoyarsk': 'Красноярск',
+            'UFA': 'Уфа',
+            'KZN': 'Казань',
+            'Kazan': 'Казань',
+            'GOJ': 'Нижний Новгород',
+            'Nizhny Novgorod': 'Нижний Новгород',
+            'ASF': 'Астрахань',
+            'Astrakhan': 'Астрахань',
+            'STW': 'Ставрополь',
+            'Stavropol': 'Ставрополь',
+        }
+        
+        # Города и их коды
+        self.city_codes = {
+            'Пекин': 'PEK',
+            'Beijing': 'PEK',
+            'Гуанчжоу': 'CAN',
+            'Guangzhou': 'CAN',
+            'Шанхай': 'SHA',
+            'Shanghai': 'SHA',
+            'Шэньчжэнь': 'SZX',
+            'Shenzhen': 'SZX',
+            'Чэнду': 'CTU',
+            'Chengdu': 'CTU',
+            'Сиань': 'XIY',
+            'Xian': 'XIY',
+            'Чунцин': 'CKG',
+            'Chongqing': 'CKG',
+            'Ханчжоу': 'HGH',
+            'Hangzhou': 'HGH',
+            'Нинбо': 'NGB',
+            'Ningbo': 'NGB',
+            'Циндао': 'TAO',
+            'Qingdao': 'TAO',
+            'Далянь': 'DLC',
+            'Dalian': 'DLC',
+            'Тяньцзинь': 'TSN',
+            'Tianjin': 'TSN',
+            'Сямэнь': 'XMN',
+            'Xiamen': 'XMN',
+            'Ухань': 'WUH',
+            'Wuhan': 'WUH',
+            'Нанкин': 'NKG',
+            'Nanjing': 'NKG',
+            'Гонконг': 'HKG',
+            'Hong Kong': 'HKG',
+            'Макао': 'MFM',
+            'Macau': 'MFM',
+            'Москва': 'MOS',
+            'Moscow': 'MOS',
+            'Санкт-Петербург': 'SPB',
+            'St. Petersburg': 'SPB',
+            'Владивосток': 'VVO',
+            'Vladivostok': 'VVO',
+            'Краснодар': 'KRR',
+            'Krasnodar': 'KRR',
+            'Ростов-на-Дону': 'ROV',
+            'Rostov': 'ROV',
+            'Екатеринбург': 'SVX',
+            'Yekaterinburg': 'SVX',
+            'Новосибирск': 'OVB',
+            'Novosibirsk': 'OVB',
+            'Красноярск': 'KJA',
+            'Krasnoyarsk': 'KJA',
+            'Уфа': 'UFA',
+            'Казань': 'KZN',
+            'Kazan': 'KZN',
+            'Нижний Новгород': 'GOJ',
+            'Nizhny Novgorod': 'GOJ',
+            'Астрахань': 'ASF',
+            'Astrakhan': 'ASF',
+            'Ставрополь': 'STW',
+            'Stavropol': 'STW',
+        }
+    
+    def extract_ltl_routes(self, text: str) -> List[Dict]:
+        """Извлекает LTL маршруты."""
+        routes = []
+        
+        # Обрабатываем табличные данные
+        lines = text.split('\n')
+        for line in lines:
+            if '|' in line:
+                # Табличная строка
+                parts = [p.strip() for p in line.split('|')]
+                if len(parts) >= 3:
+                    # Ищем города в первых колонках
+                    origin = self._extract_city_from_text(parts[0])
+                    destination = self._extract_city_from_text(parts[1])
+                    
+                    if origin and destination and origin != destination:
+                        # Ищем цены в остальных колонках
+                        prices = self._extract_prices_from_parts(parts[2:])
+                        
+                        route = {
+                            'origin_city': origin,
+                            'origin_country': self._get_country_by_city(origin),
+                            'destination_city': destination,
+                            'destination_country': self._get_country_by_city(destination),
+                            'transport_type': 'ltl',
+                            'price_usd': prices.get('usd'),
+                            'price_cny': prices.get('cny'),
+                            'price_rub': prices.get('rub'),
+                            'weight_unit': self._extract_weight_unit(line)
+                        }
+                        routes.append(route)
+        
+        # Обрабатываем текстовые маршруты
+        for pattern in self.ltl_patterns['routes']:
+            matches = re.finditer(pattern, text, re.IGNORECASE)
+            for match in matches:
+                origin = match.group(1).strip()
+                destination = match.group(2).strip()
+                
+                if origin and destination and origin != destination:
+                    # Нормализуем названия городов
+                    origin = self._normalize_city_name(origin)
+                    destination = self._normalize_city_name(destination)
+                    
+                    if origin and destination and origin != destination:
+                        route = {
+                            'origin_city': origin,
+                            'origin_country': self._get_country_by_city(origin),
+                            'destination_city': destination,
+                            'destination_country': self._get_country_by_city(destination),
+                            'transport_type': 'ltl',
+                            'price_usd': None,
+                            'price_cny': None,
+                            'price_rub': None,
+                            'weight_unit': None
+                        }
+                        routes.append(route)
+        
+        return routes[:10]  # Ограничиваем количество
+    
+    def _normalize_city_name(self, city: str) -> Optional[str]:
+        """Нормализует название города."""
+        if not city or city.strip() == '':
+            return None
+        
+        city = city.strip()
+        
+        # Проверяем коды городов
+        if city.upper() in self.ltl_routes:
+            return self.ltl_routes[city.upper()]
+        
+        # Проверяем города
+        for normalized_city, code in self.city_codes.items():
+            if city.lower() == normalized_city.lower() or city.lower() == code.lower():
+                return normalized_city
+        
+        # Если не нашли, возвращаем как есть (если это похоже на город)
+        if len(city) > 2 and not city.isdigit() and not city.lower() in ['from', 'to', 'via', 'through', 'route', 'ltl', 'сборка']:
+            return city
+        
+        return None
+    
+    def _extract_city_from_text(self, text: str) -> Optional[str]:
+        """Извлекает название города из текста."""
+        if not text or text.strip() == '':
+            return None
+        
+        text = text.strip()
+        
+        # Проверяем известные города
+        for city in self.city_codes.keys():
+            if city.lower() in text.lower():
+                return city
+        
+        # Проверяем коды городов
+        for code, city in self.ltl_routes.items():
+            if code.lower() in text.lower():
+                return city
+        
+        # Если не нашли, возвращаем как есть (если это похоже на город)
+        if len(text) > 2 and not text.isdigit():
+            return text
+        
+        return None
+    
+    def _extract_prices_from_parts(self, parts: List[str]) -> Dict:
+        """Извлекает цены из частей строки."""
+        prices = {'usd': None, 'cny': None, 'rub': None}
+        
+        for part in parts:
+            part = part.strip()
+            if not part:
+                continue
+            
+            # Ищем USD
+            usd_match = re.search(r'(\d+(?:\.\d+)?)\s*USD', part, re.IGNORECASE)
+            if usd_match:
+                prices['usd'] = float(usd_match.group(1))
+            
+            # Ищем CNY/RMB
+            cny_match = re.search(r'(\d+(?:\.\d+)?)\s*(?:CNY|RMB)', part, re.IGNORECASE)
+            if cny_match:
+                prices['cny'] = float(cny_match.group(1))
+            
+            # Ищем RUB
+            rub_match = re.search(r'(\d+(?:\.\d+)?)\s*(?:RUB|₽)', part, re.IGNORECASE)
+            if rub_match:
+                prices['rub'] = float(rub_match.group(1))
+        
+        return prices
+    
+    def _extract_weight_unit(self, text: str) -> Optional[str]:
+        """Извлекает единицу веса."""
+        for pattern in self.ltl_patterns['weights']:
+            match = re.search(pattern, text, re.IGNORECASE)
+            if match:
+                return match.group(0).strip()
+        return None
+    
+    def _get_country_by_city(self, city: str) -> str:
+        """Определяет страну по городу."""
+        if not city:
+            return 'Неизвестно'
+        
+        # Китайские города
+        chinese_cities = ['Пекин', 'Beijing', 'Гуанчжоу', 'Guangzhou', 'Шанхай', 'Shanghai', 'Шэньчжэнь', 'Shenzhen', 'Чэнду', 'Chengdu', 'Сиань', 'Xian', 'Чунцин', 'Chongqing', 'Ханчжоу', 'Hangzhou', 'Нинбо', 'Ningbo', 'Циндао', 'Qingdao', 'Далянь', 'Dalian', 'Тяньцзинь', 'Tianjin', 'Сямэнь', 'Xiamen', 'Ухань', 'Wuhan', 'Нанкин', 'Nanjing', 'Гонконг', 'Hong Kong', 'Макао', 'Macau']
+        if city in chinese_cities:
+            return 'Китай'
+        
+        # Российские города
+        russian_cities = ['Москва', 'Moscow', 'Санкт-Петербург', 'St. Petersburg', 'Владивосток', 'Vladivostok', 'Краснодар', 'Krasnodar', 'Ростов-на-Дону', 'Rostov', 'Екатеринбург', 'Yekaterinburg', 'Новосибирск', 'Novosibirsk', 'Красноярск', 'Krasnoyarsk', 'Уфа', 'Казань', 'Kazan', 'Нижний Новгород', 'Nizhny Novgorod', 'Астрахань', 'Astrakhan', 'Ставрополь', 'Stavropol']
+        if city in russian_cities:
+            return 'Россия'
+        
+        return 'Неизвестно'
+    
+    def analyze_ltl_file(self, text: str, file_path: str) -> Dict[str, Any]:
+        """Анализирует LTL файл."""
+        
+        # Сначала используем стандартный анализатор
+        base_result = analyze_tariff_text_adaptive(text)
+        
+        # Принудительно устанавливаем тип транспорта
+        base_result['transport_type'] = 'ltl'
+        base_result['basis'] = 'EXW'  # По умолчанию для LTL
+        
+        # Извлекаем LTL маршруты
+        ltl_routes = self.extract_ltl_routes(text)
+        
+        # Объединяем результаты
+        if ltl_routes:
+            base_result['routes'] = ltl_routes
+        else:
+            # Очищаем стандартные маршруты от ложных срабатываний
+            base_result['routes'] = self._clean_standard_routes(base_result.get('routes', []))
+        
+        return base_result
+    
+    def _clean_standard_routes(self, routes: List[Dict]) -> List[Dict]:
+        """Очищает стандартные маршруты от ложных срабатываний."""
+        cleaned = []
+        
+        for route in routes:
+            origin = route.get('origin_city', '')
+            destination = route.get('destination_city', '')
+            
+            # Пропускаем маршруты с пустыми городами
+            if not origin or not destination:
+                continue
+            
+            # Пропускаем маршруты с "Неизвестно"
+            if 'Неизвестно' in origin or 'Неизвестно' in destination:
+                continue
+            
+            # Пропускаем слишком короткие названия
+            if len(origin) < 2 or len(destination) < 2:
+                continue
+            
+            # Пропускаем числовые значения (цены, даты и т.д.)
+            if origin.replace('.', '').replace(',', '').isdigit() or destination.replace('.', '').replace(',', '').isdigit():
+                continue
+            
+            # Пропускаем служебные слова
+            skip_words = ['ltl', 'сборка', 'сборный', 'частичная', 'partial', 'consolidation']
+            if any(word in origin.lower() or word in destination.lower() for word in skip_words):
+                continue
+            
+            cleaned.append(route)
+        
+        return cleaned[:10]
+
+def analyze_ltl_file(text: str, file_path: str) -> Dict[str, Any]:
+    """Универсальная функция анализа LTL файла."""
+    analyzer = LTLAnalyzer()
+    return analyzer.analyze_ltl_file(text, file_path)
+

@@ -1,0 +1,25 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# FastAPI/локальные файлы
+backend/generated_docs/
+backend/*.db
+backend/*.sqlite
+backend/uploads/
+.env
+*.log
+
+# Node/Vite
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.*
+
+# IDE/OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
