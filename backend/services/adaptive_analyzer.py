@@ -8,13 +8,8 @@ import logging
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 
-# Импортируем LLM анализатор
-try:
-    from .llm_analyzer import analyze_tariff_with_llm
-    LLM_AVAILABLE = True
-except ImportError:
-    LLM_AVAILABLE = False
-    logging.warning("LLM анализатор недоступен")
+# LLM анализатор удален
+LLM_AVAILABLE = False
 
 @dataclass
 class ParsingStrategy:
@@ -174,7 +169,8 @@ class AdaptiveTariffAnalyzer:
         if use_llm and LLM_AVAILABLE and best_strategy.name == "air_tariff":
             self.logger.info("Используем LLM для анализа авиационного тарифа")
             try:
-                llm_result = analyze_tariff_with_llm(text, llm_api_key)
+                # LLM анализ отключен
+                llm_result = None
                 # Объединяем результаты
                 result = self._apply_strategy(text, best_strategy)
                 result.update(llm_result)

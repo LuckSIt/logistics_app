@@ -14,7 +14,7 @@ from backend.services.security import get_current_user
 from backend.services.text_extractor import extract_text_from_file, get_supported_formats, is_format_supported
 from backend.services.adaptive_analyzer import analyze_tariff_text_adaptive
 from backend.services.enhanced_aviation_analyzer import analyze_aviation_file_enhanced
-from backend.services.context_analyzer import analyze_with_context
+# LLM анализатор удален
 
 logger = logging.getLogger(__name__)
 

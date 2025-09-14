@@ -1,0 +1,2 @@
+[33m79cb02c[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m Remove API key from config - use environment variable instead
+[33m5d9e4e6[m Initial commit

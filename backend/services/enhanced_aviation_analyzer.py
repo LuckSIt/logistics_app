@@ -7,7 +7,7 @@
 import re
 import logging
 from typing import Dict, List, Any, Optional
-from .llm_analyzer import LLMTariffAnalyzer
+# LLM анализатор удален
 from .adaptive_analyzer import analyze_tariff_text_adaptive
 
 logger = logging.getLogger(__name__)
@@ -17,7 +17,8 @@ class EnhancedAviationAnalyzer:
     
     def __init__(self, use_llm: bool = False, llm_api_key: Optional[str] = None):
         self.use_llm = use_llm
-        self.llm_analyzer = LLMTariffAnalyzer(llm_api_key) if use_llm else None
+        # LLM анализатор отключен
+        self.llm_analyzer = None
         self.logger = logging.getLogger(__name__)
     
     def analyze_aviation_file(self, text: str) -> Dict[str, Any]:
@@ -29,13 +30,8 @@ class EnhancedAviationAnalyzer:
         # Шаг 2: Стандартный анализ
         standard_result = analyze_tariff_text_adaptive(corrected_text)
         
-        # Шаг 3: LLM анализ (если доступен)
+        # Шаг 3: LLM анализ отключен
         llm_result = None
-        if self.use_llm and self.llm_analyzer:
-            try:
-                llm_result = self.llm_analyzer.extract_structured_data(corrected_text)
-            except Exception as e:
-                self.logger.error(f"LLM анализ не удался: {e}")
         
         # Шаг 4: Улучшенный анализ маршрутов
         enhanced_routes = self._extract_enhanced_routes(corrected_text)
