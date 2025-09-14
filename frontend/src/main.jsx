@@ -99,12 +99,7 @@ function Header({ user, onLogout, onToggleSidebar, sidebarOpen }) {
           </span>
         </button>
         <div className="header-brand">
-          <div className="header-logo">
-            <span className="logo-letter">В</span>
-          </div>
-          <div className="header-title">
-            {import.meta.env.VITE_BRAND_NAME || 'Верес-Тариф'}
-          </div>
+          <img src="/logo.png" alt="logo" className="header-logo" />
         </div>
       </div>
       <div className="header-user">
@@ -630,12 +625,7 @@ function AuthPage({ onLogin, mode = 'client' }) {
         <div className="auth-card">
           <div className="auth-header">
             <div className="auth-logo">
-              <div className="auth-logo-icon">
-                <span className="logo-letter">В</span>
-              </div>
-              <div className="auth-logo-text">
-                {import.meta.env.VITE_BRAND_NAME || 'Верес-Тариф'}
-              </div>
+              <img src="/logo.png" alt="logo" className="auth-logo-icon" />
             </div>
             <h1 className="auth-title">Добро пожаловать</h1>
             <p className="auth-subtitle">Войдите в систему для доступа к тарифам и логистическим решениям</p>
