@@ -7,13 +7,13 @@
 import re
 import os
 from typing import Dict, List, Optional, Any
-from backend.services.enhanced_aviation_analyzer import analyze_aviation_file_enhanced
-from backend.services.adaptive_analyzer import analyze_tariff_text_adaptive
-from backend.services.railway_analyzer import analyze_railway_file
-from backend.services.air_analyzer import analyze_air_file
-from backend.services.sea_analyzer import analyze_sea_file
-from backend.services.auto_analyzer import analyze_auto_file
-from backend.services.ltl_analyzer import analyze_ltl_file
+from services.enhanced_aviation_analyzer import analyze_aviation_file_enhanced
+from services.adaptive_analyzer import analyze_tariff_text_adaptive
+from services.railway_analyzer import analyze_railway_file
+from services.air_analyzer import analyze_air_file
+from services.sea_analyzer import analyze_sea_file
+from services.auto_analyzer import analyze_auto_file
+from services.ltl_analyzer import analyze_ltl_file
 
 class UniversalAnalyzer:
     """Универсальный анализатор для всех типов файлов."""

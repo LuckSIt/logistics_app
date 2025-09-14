@@ -2,10 +2,10 @@ import os
 import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.routers import users  # импортируем router
-from backend.routers import auth, contractors, files, quotes, tariffs, reference, offers, currency, requests_history, discounts, text_extraction, auto_tariff, llm_parser, markups, request_history, stats
-from backend.database import Base, engine
-from backend import models
+from routers import users  # импортируем router
+from routers import auth, contractors, files, quotes, tariffs, reference, offers, currency, requests_history, discounts, text_extraction, auto_tariff, llm_parser, markups, request_history, stats
+from database import Base, engine
+import models
 
 # Настройка логирования
 logging.basicConfig(

@@ -20,10 +20,22 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY backend/ .
 
 # Создаем необходимые директории
-RUN mkdir -p uploaded_files generated_docs
+RUN mkdir -p uploaded_files generated_docs data
+
+# Устанавливаем PYTHONPATH
+ENV PYTHONPATH=/app
 
 # Открываем порт
 EXPOSE 8000
 
+# Создаем скрипт запуска
+RUN echo '#!/bin/bash\n\
+echo "🚀 Запуск Верес-Тариф Backend"\n\
+echo "Инициализация базы данных..."\n\
+python init_db.py\n\
+echo "Запуск сервера..."\n\
+uvicorn main:app --host 0.0.0.0 --port 8000\n\
+' > /app/start.sh && chmod +x /app/start.sh
+
 # Команда запуска
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["/app/start.sh"]

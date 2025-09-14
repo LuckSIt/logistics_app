@@ -1,10 +1,10 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from backend.database import SessionLocal
-from backend import models, schemas
-from backend.services.security import get_current_user, can_add_tariffs, can_view_archive
-from backend.services.tariff_archive import TariffArchiveService
+from database import SessionLocal
+import models, schemas
+from services.security import get_current_user, can_add_tariffs, can_view_archive
+from services.tariff_archive import TariffArchiveService
 
 router = APIRouter()
 
@@ -201,7 +201,7 @@ def create_bulk_tariffs(
             # Конвертация валюты если нужно
             price_rub = tariff_data.get("price_rub")
             if price_rub is None and tariff_data.get("price_usd") is not None:
-                from backend.services import cbr
+                from services import cbr
                 rate = cbr.get_usd_rate()
                 price_rub = float(tariff_data["price_usd"]) * rate
             

@@ -3,11 +3,11 @@ import logging
 from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Form
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from backend.database import SessionLocal
-from backend import models, schemas
-from backend.services.security import get_current_user
-from backend.services.llm_parser import LLMTariffParser
-from backend.services import cbr
+from database import SessionLocal
+import models, schemas
+from services.security import get_current_user
+from services.llm_parser import LLMTariffParser
+from services import cbr
 
 logger = logging.getLogger(__name__)
 
@@ -100,7 +100,7 @@ async def upload_with_llm_parser(
                 ).all()
                 
                 # Архивируем старые тарифы
-                from backend.services.tariff_archive import TariffArchiveService
+                from services.tariff_archive import TariffArchiveService
                 archive_service = TariffArchiveService(db)
                 
                 for old_tariff in existing_tariffs:

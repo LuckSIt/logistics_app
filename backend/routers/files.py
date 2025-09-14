@@ -3,10 +3,10 @@ from datetime import date
 from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Form
 from sqlalchemy.orm import Session
 from typing import List
-from backend.database import SessionLocal
-from backend import models, schemas
-from backend.services import parsers, cbr
-from backend.services.security import get_current_user, can_add_tariffs
+from database import SessionLocal
+import models, schemas
+from services import parsers, cbr
+from services.security import get_current_user, can_add_tariffs
 import logging
 from typing import List
 
@@ -67,7 +67,7 @@ async def upload_tariffs(
         
         if use_llm:
             # Используем LLM парсер
-            from backend.services.llm_parser import LLMTariffParser
+            from services.llm_parser import LLMTariffParser
             try:
                 llm_parser = LLMTariffParser(model=llm_model)
                 rows = llm_parser.parse_tariff_data(save_path, supplier_id)
@@ -83,7 +83,7 @@ async def upload_tariffs(
             rows = parsers.parse_tariff_file(save_path, supplier_id)
         else:
             # Используем специализированный парсер
-            from backend.services.parser_factory import ParserFactory
+            from services.parser_factory import ParserFactory
             try:
                 parser = ParserFactory.get_parser(transport_type)
                 rows = parser.parse_tariff_data(save_path, supplier_id)
@@ -130,7 +130,7 @@ async def upload_tariffs(
                 ).all()
                 
                 # Архивируем старые тарифы
-                from backend.services.tariff_archive import TariffArchiveService
+                from services.tariff_archive import TariffArchiveService
                 archive_service = TariffArchiveService(db)
                 
                 for old_tariff in existing_tariffs:

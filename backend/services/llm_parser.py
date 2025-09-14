@@ -1,7 +1,7 @@
 from typing import List, Dict, Any
 import logging
 from .base_parser import BaseParser
-from backend.parser import LLMParser
+from parser import LLMParser
 
 logger = logging.getLogger(__name__)
 

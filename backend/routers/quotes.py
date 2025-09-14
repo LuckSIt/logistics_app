@@ -1,11 +1,11 @@
 from typing import List
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from backend.database import SessionLocal
-from backend import models, schemas
-from backend.services.security import get_current_user, can_choose_transport, can_download_kp
-from backend.services import cbr
-from backend.services.tariff_archive import TariffArchiveService
+from database import SessionLocal
+import models, schemas
+from services.security import get_current_user, can_choose_transport, can_download_kp
+from services import cbr
+from services.tariff_archive import TariffArchiveService
 
 router = APIRouter()
 

@@ -8,12 +8,12 @@ from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Form
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
-from backend.database import SessionLocal
-from backend import models, schemas
-from backend.services.security import get_current_user
-from backend.services.text_extractor import extract_text_from_file, get_supported_formats, is_format_supported
-from backend.services.adaptive_analyzer import analyze_tariff_text_adaptive
-from backend.services.enhanced_aviation_analyzer import analyze_aviation_file_enhanced
+from database import SessionLocal
+import models, schemas
+from services.security import get_current_user
+from services.text_extractor import extract_text_from_file, get_supported_formats, is_format_supported
+from services.adaptive_analyzer import analyze_tariff_text_adaptive
+from services.enhanced_aviation_analyzer import analyze_aviation_file_enhanced
 # LLM анализатор удален
 
 logger = logging.getLogger(__name__)
@@ -106,11 +106,11 @@ async def extract_tariff_data_from_file(
         try:
             if transport_type == "auto":
                 # Автоматическое определение типа транспорта
-                from backend.services.parser_factory import ParserFactory
+                from services.parser_factory import ParserFactory
                 extracted_data = ParserFactory.parse_with_auto_detection(save_path, supplier_id)
             else:
                 # Используем специализированный парсер
-                from backend.services.parser_factory import ParserFactory
+                from services.parser_factory import ParserFactory
                 try:
                     parser = ParserFactory.get_parser(transport_type)
                     extracted_data = parser.parse_tariff_data(save_path, supplier_id)
@@ -142,7 +142,7 @@ async def extract_tariff_data_from_file(
                 except ValueError as e:
                     logger.warning(f"Парсер для типа {transport_type} не найден, используем автоопределение: {e}")
                     # Fallback к автоопределению
-                    from backend.services.parser_factory import ParserFactory
+                    from services.parser_factory import ParserFactory
                     extracted_data = ParserFactory.parse_with_auto_detection(save_path, supplier_id)
             
             logger.info(f"Анализ успешен, найдено маршрутов: {len(extracted_data.get('routes', []))}")
@@ -239,7 +239,7 @@ async def save_extracted_tariff(
         archived_count = 0
         if existing_tariffs:
             # Архивируем старые тарифы
-            from backend.services.tariff_archive import TariffArchiveService
+            from services.tariff_archive import TariffArchiveService
             archive_service = TariffArchiveService(db)
             
             for old_tariff in existing_tariffs:
@@ -265,7 +265,7 @@ async def save_extracted_tariff(
         
         # Если тариф создан экспедитором, автоматически архивируем его
         if current_user.role == models.UserRole.forwarder:
-            from backend.services.tariff_archive import TariffArchiveService
+            from services.tariff_archive import TariffArchiveService
             archive_service = TariffArchiveService(db)
             archived_tariff = archive_service.archive_tariff(db_tariff, "Автоматическое архивирование тарифа экспедитора")
             logger.info(f"Тариф экспедитора автоматически архивирован: Archive ID {archived_tariff.id}")

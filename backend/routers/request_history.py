@@ -1,9 +1,9 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from backend.database import SessionLocal
-from backend import models, schemas
-from backend.services.security import can_view_request_history
+from database import SessionLocal
+import models, schemas
+from services.security import can_view_request_history
 
 router = APIRouter()
 

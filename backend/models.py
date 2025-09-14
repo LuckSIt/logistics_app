@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Enum, Float, Boolean, Date, DateTime, ForeignKey, Text, JSON as JSONType
-from backend.database import Base
+from database import Base
 import enum
 from datetime import datetime
 

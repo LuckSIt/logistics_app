@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 # Поддержка как SQLite для разработки, так и PostgreSQL для продакшн
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "sqlite:///./veres.db",
+    "sqlite:///./data/veres.db",
 )
 
 # Настройки для разных типов БД

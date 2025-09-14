@@ -30,7 +30,7 @@ try:
     _pdfdoc.md5 = _safe_md5  # ignore unsupported usedforsecurity kwarg
 except Exception:
     pass
-from backend.schemas import CalculateOption
+from schemas import CalculateOption
 
 
 def _get_value(opt: Any, key: str, default=None):
