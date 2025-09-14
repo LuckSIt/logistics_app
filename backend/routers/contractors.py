@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 from backend.database import SessionLocal
 from backend import models, schemas
-from backend.services.security import get_current_user
+from backend.services.security import get_current_user, can_set_markups
 
 router = APIRouter()
 
@@ -61,7 +61,7 @@ def list_suppliers(_: models.User = Depends(get_current_user), db: Session = Dep
 
 
 @router.patch("/{supplier_id}/markup", response_model=schemas.SupplierOut)
-def set_markup(supplier_id: int, markup_percent: float = 0.0, markup_fixed: float = 0.0, _: models.User = Depends(require_admin), db: Session = Depends(get_db)):
+def set_markup(supplier_id: int, markup_percent: float = 0.0, markup_fixed: float = 0.0, _: models.User = Depends(can_set_markups), db: Session = Depends(get_db)):
     supplier = db.query(models.Supplier).filter(models.Supplier.id == supplier_id).first()
     if not supplier:
         raise HTTPException(status_code=404, detail="Поставщик не найден")
@@ -166,5 +166,17 @@ def scan_files_and_create_suppliers(_: models.User = Depends(require_admin), db:
         "total_suppliers": db.query(models.Supplier).count(),
         "scanned_files": scanned_files
     }
+
+
+@router.delete("/{supplier_id}")
+def delete_supplier(supplier_id: int, _: models.User = Depends(can_set_markups), db: Session = Depends(get_db)):
+    """Удалить поставщика (для сотрудников и администраторов)"""
+    supplier = db.query(models.Supplier).filter(models.Supplier.id == supplier_id).first()
+    if not supplier:
+        raise HTTPException(status_code=404, detail="Поставщик не найден")
+    
+    db.delete(supplier)
+    db.commit()
+    return {"message": "Поставщик удален"}
 
 

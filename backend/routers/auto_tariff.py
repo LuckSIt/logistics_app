@@ -187,7 +187,7 @@ async def extract_tariff_data_from_file(
 async def save_extracted_tariff(
     tariff_data: schemas.TariffIn,
     db: Session = Depends(get_db),
-    _: models.User = Depends(get_current_user),
+    current_user: models.User = Depends(get_current_user),
 ):
     """
     Сохранить извлеченный тариф в базу данных.
@@ -256,11 +256,34 @@ async def save_extracted_tariff(
         
         # Создаем новый тариф
         db_tariff = models.Tariff(**tariff_dict)
+        db_tariff.created_by_user_id = current_user.id  # Сохраняем создателя тарифа
         db.add(db_tariff)
         db.commit()
         db.refresh(db_tariff)
         
         logger.info(f"Тариф сохранен: ID {db_tariff.id}")
+        
+        # Если тариф создан экспедитором, автоматически архивируем его
+        if current_user.role == models.UserRole.forwarder:
+            from backend.services.tariff_archive import TariffArchiveService
+            archive_service = TariffArchiveService(db)
+            archived_tariff = archive_service.archive_tariff(db_tariff, "Автоматическое архивирование тарифа экспедитора")
+            logger.info(f"Тариф экспедитора автоматически архивирован: Archive ID {archived_tariff.id}")
+            
+            # Сохраняем ID оригинального тарифа перед удалением
+            original_tariff_id = db_tariff.id
+            
+            # Удаляем оригинальный тариф, оставляя только архивную копию
+            db.delete(db_tariff)
+            db.commit()
+            
+            return {
+                "success": True,
+                "message": "Тариф экспедитора сохранен в архив",
+                "tariff_id": original_tariff_id,
+                "archive_id": archived_tariff.id,
+                "archived_count": archived_count
+            }
         
         return {
             "success": True,

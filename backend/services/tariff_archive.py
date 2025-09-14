@@ -54,7 +54,8 @@ class TariffArchiveService:
             security_cost=tariff.security_cost,
             precarriage_cost=tariff.precarriage_cost,
             archive_reason=reason,
-            is_active=True
+            is_active=True,
+            created_by_user_id=tariff.created_by_user_id
         )
         
         self.db.add(archived_tariff)

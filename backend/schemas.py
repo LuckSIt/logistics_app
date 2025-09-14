@@ -131,6 +131,7 @@ class TariffArchiveOut(BaseModel):
     archived_at: datetime
     archive_reason: Optional[str] = None
     is_active: bool
+    created_by_user_id: Optional[int] = None
 
     class Config:
         from_attributes = True

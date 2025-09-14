@@ -41,7 +41,12 @@ const UserManagement = ({ user }) => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('/users/', {
+      let endpoint = '/users/';
+      if (user.role === 'employee') {
+        endpoint = '/users/forwarders-and-clients';
+      }
+      
+      const response = await axios.get(endpoint, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -69,7 +74,12 @@ const UserManagement = ({ user }) => {
     try {
       if (editingUser) {
         // Обновление пользователя
-        await axios.put(`/users/${editingUser.id}`, formData, {
+        let endpoint = `/users/${editingUser.id}`;
+        if (user.role === 'employee') {
+          endpoint = `/users/forwarder/${editingUser.id}`;
+        }
+        
+        await axios.put(endpoint, formData, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -77,7 +87,12 @@ const UserManagement = ({ user }) => {
         setSuccess('Пользователь успешно обновлен');
       } else {
         // Создание нового пользователя
-        await axios.post('/users/', formData, {
+        let endpoint = '/users/';
+        if (user.role === 'employee') {
+          endpoint = '/users/forwarder';
+        }
+        
+        await axios.post(endpoint, formData, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -115,7 +130,12 @@ const UserManagement = ({ user }) => {
     }
 
     try {
-      await axios.delete(`/users/${userId}`, {
+      let endpoint = `/users/${userId}`;
+      if (user.role === 'employee') {
+        endpoint = `/users/forwarder/${userId}`;
+      }
+      
+      await axios.delete(endpoint, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -206,8 +226,8 @@ const UserManagement = ({ user }) => {
                   onChange={handleChange}
                   required
                 >
-                  <option value="admin">Администратор</option>
-                  <option value="employee">Сотрудник</option>
+                  {user.role === 'admin' && <option value="admin">Администратор</option>}
+                  {user.role === 'admin' && <option value="employee">Сотрудник</option>}
                   <option value="forwarder">Экспедитор</option>
                   <option value="client">Клиент</option>
                 </select>

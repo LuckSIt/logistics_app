@@ -157,6 +157,7 @@ async def upload_with_llm_parser(
                 
                 # Создаем тариф в базе данных
                 tariff = models.Tariff(**tariff_data)
+                tariff.created_by_user_id = current_user.id  # Сохраняем создателя тарифа
                 db.add(tariff)
                 saved_count += 1
                 

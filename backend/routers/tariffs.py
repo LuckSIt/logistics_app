@@ -9,6 +9,36 @@ from backend.services.tariff_archive import TariffArchiveService
 router = APIRouter()
 
 
+def _format_route(archive):
+    """Форматирует маршрут из данных архива"""
+    route_parts = []
+    
+    # Добавляем город отправления
+    if archive.origin_city:
+        route_parts.append(archive.origin_city)
+    elif archive.origin_country:
+        route_parts.append(archive.origin_country)
+    
+    # Добавляем город назначения
+    if archive.destination_city:
+        route_parts.append(archive.destination_city)
+    elif archive.destination_country:
+        route_parts.append(archive.destination_country)
+    
+    # Если есть транзитный порт или станции
+    if archive.transit_port:
+        route_parts.append(f"через {archive.transit_port}")
+    elif archive.departure_station and archive.arrival_station:
+        route_parts.append(f"{archive.departure_station} → {archive.arrival_station}")
+    
+    if len(route_parts) >= 2:
+        return " → ".join(route_parts)
+    elif len(route_parts) == 1:
+        return route_parts[0]
+    else:
+        return "-"
+
+
 def get_db():
     db = SessionLocal()
     try:
@@ -113,23 +143,28 @@ def list_archive(_: models.User = Depends(get_current_user), db: Session = Depen
         models.TariffArchive.is_active == True
     ).order_by(models.TariffArchive.archived_at.desc()).all()
     
-    # Получаем данные поставщиков
+    # Получаем данные поставщиков и пользователей
     suppliers = {s.id: s for s in db.query(models.Supplier).all()}
+    users = {u.id: u for u in db.query(models.User).all()}
     
     result = []
     for archive in archived_tariffs:
         supplier = suppliers.get(archive.supplier_id)
+        creator = users.get(archive.created_by_user_id) if archive.created_by_user_id else None
+        
         result.append({
             "id": archive.id,
             "archived_at": archive.archived_at.isoformat() if archive.archived_at else None,
-            "supplier_name": supplier.name if supplier else "Неизвестный поставщик",
+            "supplier_name": supplier.name if supplier else f"ID: {archive.supplier_id}",
             "transport_type": archive.transport_type.value if archive.transport_type else None,
-            "route": f"{archive.origin_city or ''} → {archive.destination_city or ''}" if archive.origin_city or archive.destination_city else None,
+            "route": _format_route(archive),
             "basis": archive.basis,
             "price_rub": archive.price_rub,
             "price_usd": archive.price_usd,
             "archive_reason": archive.archive_reason,
-            "original_tariff_id": archive.original_tariff_id
+            "original_tariff_id": archive.original_tariff_id,
+            "created_by": creator.username if creator else "Система",
+            "created_by_role": creator.role.value if creator else None
         })
     
     return result
@@ -237,6 +272,7 @@ def create_bulk_tariffs(
                 auto_pickup_cost=tariff_data.get("auto_pickup_cost"),
                 security_cost=tariff_data.get("security_cost"),
                 precarriage_cost=tariff_data.get("precarriage_cost"),
+                created_by_user_id=current_user.id,  # Сохраняем создателя тарифа
             )
             db.add(tariff)
             created += 1

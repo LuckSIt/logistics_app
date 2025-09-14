@@ -72,6 +72,7 @@ class Tariff(Base):
     transit_time_days = Column(Integer, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     source_file = Column(String, nullable=True)
+    created_by_user_id = Column(Integer, ForeignKey("users.id"), index=True, nullable=True)  # Кто создал тариф
     
     # Дополнительные поля для мультимодальных перевозок
     transit_port = Column(String, nullable=True)  # Транзитный порт
@@ -121,6 +122,7 @@ class TariffArchive(Base):
     archived_at = Column(DateTime, default=datetime.utcnow)
     archive_reason = Column(String, nullable=True)  # Причина архивирования
     is_active = Column(Boolean, default=True)  # Активен ли архивный тариф
+    created_by_user_id = Column(Integer, ForeignKey("users.id"), index=True, nullable=True)  # Кто создал тариф
 
 
 class Discount(Base):

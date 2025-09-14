@@ -159,184 +159,172 @@ function RailwayTransportPage({ token, user }) {
           <form onSubmit={handleSubmit} className="form-grid">
             <div className="form-section">
               <h3>🚂 Вид доставки и базис</h3>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Вид доставки *</label>
-                  <select
-                    value={form.transport_type}
-                    onChange={(e) => setForm(prev => ({ ...prev, transport_type: e.target.value }))}
-                    required
-                  >
-                    <option value="auto">🚛 Автомобильный</option>
-                    <option value="rail">🚂 Железнодорожный</option>
-                    <option value="sea">🚢 Морской</option>
-                    <option value="air">✈️ Авиа</option>
-                    <option value="multimodal">🚢🚂✈️🚛 Мультимодал</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Базис поставки *</label>
-                  <select
-                    value={form.basis}
-                    onChange={(e) => setForm(prev => ({ ...prev, basis: e.target.value }))}
-                    required
-                  >
-                    <option value="EXW">EXW</option>
-                    <option value="FCA">FCA</option>
-                    <option value="FOB">FOB</option>
-                    <option value="CFR">CFR</option>
-                    <option value="CIF">CIF</option>
-                    <option value="CIP">CIP</option>
-                    <option value="CPT">CPT</option>
-                    <option value="DAP">DAP</option>
-                    <option value="DDP">DDP</option>
-                  </select>
-                </div>
+              <div className="form-group">
+                <label>Вид доставки *</label>
+                <select
+                  value={form.transport_type}
+                  onChange={(e) => setForm(prev => ({ ...prev, transport_type: e.target.value }))}
+                  required
+                >
+                  <option value="auto">🚛 Автомобильный</option>
+                  <option value="rail">🚂 Железнодорожный</option>
+                  <option value="sea">🚢 Морской</option>
+                  <option value="air">✈️ Авиа</option>
+                  <option value="multimodal">🚢🚂✈️🚛 Мультимодал</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Базис поставки *</label>
+                <select
+                  value={form.basis}
+                  onChange={(e) => setForm(prev => ({ ...prev, basis: e.target.value }))}
+                  required
+                >
+                  <option value="EXW">EXW</option>
+                  <option value="FCA">FCA</option>
+                  <option value="FOB">FOB</option>
+                  <option value="CFR">CFR</option>
+                  <option value="CIF">CIF</option>
+                  <option value="CIP">CIP</option>
+                  <option value="CPT">CPT</option>
+                  <option value="DAP">DAP</option>
+                  <option value="DDP">DDP</option>
+                </select>
               </div>
             </div>
 
             <div className="form-section">
               <h3>📍 Маршрут</h3>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Страна отправления *</label>
-                  <select
-                    value={form.origin_country}
-                    onChange={(e) => setForm(prev => ({ ...prev, origin_country: e.target.value }))}
-                    required
-                  >
-                    <option value="">Выберите страну</option>
-                    <option value="RU">🇷🇺 Россия</option>
-                    <option value="CN">🇨🇳 Китай</option>
-                    <option value="DE">🇩🇪 Германия</option>
-                    <option value="US">🇺🇸 США</option>
-                    <option value="KZ">🇰🇿 Казахстан</option>
-                    <option value="BY">🇧🇾 Беларусь</option>
-                    <option value="UZ">🇺🇿 Узбекистан</option>
-                    <option value="TR">🇹🇷 Турция</option>
-                    <option value="IT">🇮🇹 Италия</option>
-                    <option value="FR">🇫🇷 Франция</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Город/станция/порт отправления груза *</label>
-                  <input
-                    type="text"
-                    value={form.origin_city}
-                    onChange={(e) => setForm(prev => ({ ...prev, origin_city: e.target.value }))}
-                    placeholder="Москва"
-                    required
-                  />
-                </div>
+              <div className="form-group">
+                <label>Страна отправления *</label>
+                <select
+                  value={form.origin_country}
+                  onChange={(e) => setForm(prev => ({ ...prev, origin_country: e.target.value }))}
+                  required
+                >
+                  <option value="">Выберите страну</option>
+                  <option value="RU">🇷🇺 Россия</option>
+                  <option value="CN">🇨🇳 Китай</option>
+                  <option value="DE">🇩🇪 Германия</option>
+                  <option value="US">🇺🇸 США</option>
+                  <option value="KZ">🇰🇿 Казахстан</option>
+                  <option value="BY">🇧🇾 Беларусь</option>
+                  <option value="UZ">🇺🇿 Узбекистан</option>
+                  <option value="TR">🇹🇷 Турция</option>
+                  <option value="IT">🇮🇹 Италия</option>
+                  <option value="FR">🇫🇷 Франция</option>
+                </select>
               </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Страна доставки *</label>
-                  <select
-                    value={form.destination_country}
-                    onChange={(e) => setForm(prev => ({ ...prev, destination_country: e.target.value }))}
-                    required
-                  >
-                    <option value="">Выберите страну</option>
-                    <option value="RU">🇷🇺 Россия</option>
-                    <option value="CN">🇨🇳 Китай</option>
-                    <option value="DE">🇩🇪 Германия</option>
-                    <option value="US">🇺🇸 США</option>
-                    <option value="KZ">🇰🇿 Казахстан</option>
-                    <option value="BY">🇧🇾 Беларусь</option>
-                    <option value="UZ">🇺🇿 Узбекистан</option>
-                    <option value="TR">🇹🇷 Турция</option>
-                    <option value="IT">🇮🇹 Италия</option>
-                    <option value="FR">🇫🇷 Франция</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Город/станция/порт доставки груза *</label>
-                  <input
-                    type="text"
-                    value={form.destination_city}
-                    onChange={(e) => setForm(prev => ({ ...prev, destination_city: e.target.value }))}
-                    placeholder="Санкт-Петербург"
-                    required
-                  />
-                </div>
+              <div className="form-group">
+                <label>Город/станция/порт отправления груза *</label>
+                <input
+                  type="text"
+                  value={form.origin_city}
+                  onChange={(e) => setForm(prev => ({ ...prev, origin_city: e.target.value }))}
+                  placeholder="Москва"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Страна доставки *</label>
+                <select
+                  value={form.destination_country}
+                  onChange={(e) => setForm(prev => ({ ...prev, destination_country: e.target.value }))}
+                  required
+                >
+                  <option value="">Выберите страну</option>
+                  <option value="RU">🇷🇺 Россия</option>
+                  <option value="CN">🇨🇳 Китай</option>
+                  <option value="DE">🇩🇪 Германия</option>
+                  <option value="US">🇺🇸 США</option>
+                  <option value="KZ">🇰🇿 Казахстан</option>
+                  <option value="BY">🇧🇾 Беларусь</option>
+                  <option value="UZ">🇺🇿 Узбекистан</option>
+                  <option value="TR">🇹🇷 Турция</option>
+                  <option value="IT">🇮🇹 Италия</option>
+                  <option value="FR">🇫🇷 Франция</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Город/станция/порт доставки груза *</label>
+                <input
+                  type="text"
+                  value={form.destination_city}
+                  onChange={(e) => setForm(prev => ({ ...prev, destination_city: e.target.value }))}
+                  placeholder="Санкт-Петербург"
+                  required
+                />
               </div>
             </div>
 
             <div className="form-section">
               <h3>📦 Характеристики груза</h3>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Наименование груза *</label>
-                  <input
-                    type="text"
-                    value={form.cargo_name}
-                    onChange={(e) => setForm(prev => ({ ...prev, cargo_name: e.target.value }))}
-                    placeholder="Оборудование, товары"
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Вес, кг *</label>
-                  <input
-                    type="number"
-                    value={form.weight_kg}
-                    onChange={(e) => setForm(prev => ({ ...prev, weight_kg: e.target.value }))}
-                    placeholder="1000"
-                    required
-                  />
-                </div>
+              <div className="form-group">
+                <label>Наименование груза *</label>
+                <input
+                  type="text"
+                  value={form.cargo_name}
+                  onChange={(e) => setForm(prev => ({ ...prev, cargo_name: e.target.value }))}
+                  placeholder="Оборудование, товары"
+                  required
+                />
               </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Объём, м³ *</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={form.volume_m3}
-                    onChange={(e) => setForm(prev => ({ ...prev, volume_m3: e.target.value }))}
-                    placeholder="5.5"
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Код ТНВЭД *</label>
-                  <input
-                    type="text"
-                    value={form.hs_code}
-                    onChange={(e) => setForm(prev => ({ ...prev, hs_code: e.target.value }))}
-                    placeholder="1234567890"
-                    required
-                  />
-                </div>
+              <div className="form-group">
+                <label>Вес, кг *</label>
+                <input
+                  type="number"
+                  value={form.weight_kg}
+                  onChange={(e) => setForm(prev => ({ ...prev, weight_kg: e.target.value }))}
+                  placeholder="1000"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Объём, м³ *</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={form.volume_m3}
+                  onChange={(e) => setForm(prev => ({ ...prev, volume_m3: e.target.value }))}
+                  placeholder="5.5"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Код ТНВЭД *</label>
+                <input
+                  type="text"
+                  value={form.hs_code}
+                  onChange={(e) => setForm(prev => ({ ...prev, hs_code: e.target.value }))}
+                  placeholder="1234567890"
+                  required
+                />
               </div>
             </div>
 
             <div className="form-section">
               <h3>🛂 Таможенные условия</h3>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Погранпереход предпочитаемый</label>
-                  <input
-                    type="text"
-                    value={form.border_crossing}
-                    onChange={(e) => setForm(prev => ({ ...prev, border_crossing: e.target.value }))}
-                    placeholder="Брест, Хасан"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Место таможенного оформления</label>
-                  <select
-                    value={form.customs_clearance}
-                    onChange={(e) => setForm(prev => ({ ...prev, customs_clearance: e.target.value }))}
-                  >
-                    <option value="">По умолчанию</option>
-                    <option value="moscow_svh">Московский СВХ</option>
-                    <option value="spb_svh">Санкт-Петербургский СВХ</option>
-                    <option value="vladivostok_svh">Владивостокский СВХ</option>
-                    <option value="novorossiysk_svh">Новороссийский СВХ</option>
-                  </select>
-                </div>
+              <div className="form-group">
+                <label>Погранпереход предпочитаемый</label>
+                <input
+                  type="text"
+                  value={form.border_crossing}
+                  onChange={(e) => setForm(prev => ({ ...prev, border_crossing: e.target.value }))}
+                  placeholder="Брест, Хасан"
+                />
+              </div>
+              <div className="form-group">
+                <label>Место таможенного оформления</label>
+                <select
+                  value={form.customs_clearance}
+                  onChange={(e) => setForm(prev => ({ ...prev, customs_clearance: e.target.value }))}
+                >
+                  <option value="">По умолчанию</option>
+                  <option value="moscow_svh">Московский СВХ</option>
+                  <option value="spb_svh">Санкт-Петербургский СВХ</option>
+                  <option value="vladivostok_svh">Владивостокский СВХ</option>
+                  <option value="novorossiysk_svh">Новороссийский СВХ</option>
+                </select>
               </div>
               <div className="form-group">
                 <label>Дата готовности груза</label>
@@ -350,36 +338,34 @@ function RailwayTransportPage({ token, user }) {
 
             <div className="form-section">
               <h3>🚂 Транспорт</h3>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Тип транспортной единицы</label>
-                  <select
-                    value={form.vehicle_type}
-                    onChange={(e) => setForm(prev => ({ ...prev, vehicle_type: e.target.value }))}
-                  >
-                    <option value="">Выберите тип</option>
-                    <option value="tent_20t_82m3">Тент 20т 82м³</option>
-                    <option value="tent_20t_90m3">Тент 20т 90м³</option>
-                    <option value="tent_20t_110m3">Тент 20т 110м³</option>
-                    <option value="tent_20t_120m3">Тент 20т 120м³</option>
-                    <option value="40hc">40 HC</option>
-                    <option value="20hc">20 HC</option>
-                    <option value="40dc">40 DC</option>
-                    <option value="20dc">20 DC</option>
-                    <option value="40rf">40 RF</option>
-                    <option value="20rf">20 RF</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Количество партий/авто/контейнеров</label>
-                  <input
-                    type="number"
-                    value={form.quantity}
-                    onChange={(e) => setForm(prev => ({ ...prev, quantity: e.target.value }))}
-                    placeholder="1"
-                    min="1"
-                  />
-                </div>
+              <div className="form-group">
+                <label>Тип транспортной единицы</label>
+                <select
+                  value={form.vehicle_type}
+                  onChange={(e) => setForm(prev => ({ ...prev, vehicle_type: e.target.value }))}
+                >
+                  <option value="">Выберите тип</option>
+                  <option value="tent_20t_82m3">Тент 20т 82м³</option>
+                  <option value="tent_20t_90m3">Тент 20т 90м³</option>
+                  <option value="tent_20t_110m3">Тент 20т 110м³</option>
+                  <option value="tent_20t_120m3">Тент 20т 120м³</option>
+                  <option value="40hc">40 HC</option>
+                  <option value="20hc">20 HC</option>
+                  <option value="40dc">40 DC</option>
+                  <option value="20dc">20 DC</option>
+                  <option value="40rf">40 RF</option>
+                  <option value="20rf">20 RF</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Количество партий/авто/контейнеров</label>
+                <input
+                  type="number"
+                  value={form.quantity}
+                  onChange={(e) => setForm(prev => ({ ...prev, quantity: e.target.value }))}
+                  placeholder="1"
+                  min="1"
+                />
               </div>
             </div>
 

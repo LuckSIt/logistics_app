@@ -118,6 +118,18 @@ def can_manage_users(user: models.User = Depends(get_current_user)) -> models.Us
     return user
 
 
+def can_manage_forwarders_and_clients(user: models.User = Depends(get_current_user)) -> models.User:
+    """
+    Проверка прав на управление экспедиторами и клиентами (сотрудник или администратор)
+    """
+    if user.role not in [models.UserRole.admin, models.UserRole.employee]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Только сотрудник или администратор может управлять экспедиторами и клиентами"
+        )
+    return user
+
+
 def can_set_markups(user: models.User = Depends(get_current_user)) -> models.User:
     """
     Проверка прав на установку наценок (админ и сотрудник)
