@@ -10,8 +10,8 @@ from typing import Optional
 class LLMConfig:
     """Конфигурация для LLM анализатора."""
     
-    # OpenAI API ключ (можно установить через переменную окружения)
-    OPENAI_API_KEY: Optional[str] = os.getenv('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')
+    # OpenAI API ключ (устанавливается через переменную окружения OPENAI_API_KEY)
+    OPENAI_API_KEY: Optional[str] = os.getenv('OPENAI_API_KEY')
     
     # Модель для использования
     DEFAULT_MODEL: str = "gpt-3.5-turbo"
