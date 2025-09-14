@@ -633,9 +633,9 @@ function AutoTariffPage({ token }) {
                 </div>
 
                 {/* Отладочная информация */}
-                <div style={{ marginBottom: 20, padding: 12, backgroundColor: '#f0f0f0', borderRadius: '4px' }}>
+                <div className="form-section" style={{ marginBottom: 20 }}>
                   <h5>Отладочная информация:</h5>
-                  <div style={{ fontSize: '12px', fontFamily: 'monospace' }}>
+                  <div style={{ fontSize: '12px', fontFamily: 'monospace', color: 'var(--text-muted)' }}>
                     <div>extractedData: {extractedData ? '✓ Загружены' : '✗ Не загружены'}</div>
                     <div>tariff_data: {extractedData?.tariff_data ? '✓ Загружены' : '✗ Не загружены'}</div>
                     <div>routes: {extractedData?.tariff_data?.routes ? `${extractedData.tariff_data.routes.length} маршрутов` : '✗ Нет маршрутов'}</div>
@@ -645,35 +645,36 @@ function AutoTariffPage({ token }) {
                 </div>
 
                 {/* Предварительный просмотр извлеченного текста */}
-                <div style={{ marginBottom: 20 }}>
+                <div className="form-section" style={{ marginBottom: 20 }}>
                   <h5>Извлеченный текст из файла:</h5>
                   <div style={{ 
                     maxHeight: 200, 
                     overflow: 'auto', 
                     padding: 12, 
-                    backgroundColor: 'white', 
+                    backgroundColor: 'var(--muted-surface)', 
                     border: '1px solid var(--border)',
-                    borderRadius: '4px',
+                    borderRadius: '8px',
                     fontFamily: 'monospace',
                     fontSize: '12px',
-                    whiteSpace: 'pre-wrap'
+                    whiteSpace: 'pre-wrap',
+                    color: 'var(--text-muted)'
                   }}>
                     {extractedData.extracted_text}
                   </div>
                 </div>
 
                 {/* Форма редактирования тарифа */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
+                <div className="form-grid">
                   {/* Основные поля */}
-                  <div>
+                  <div className="form-section">
                     <h5>Основные параметры</h5>
                     
-                    <div style={{ marginBottom: 12 }}>
-                      <label style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>Тип транспорта:</label>
+                    <div className="form-group">
+                      <label className="form-label">Тип транспорта:</label>
                       <select 
                         value={extractedData?.tariff_data?.transport_type || selectedTransport.id}
                         onChange={e => updateTariffField('transport_type', e.target.value)}
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '4px', border: '1px solid var(--border)' }}
+                        className="form-select"
                       >
                         <option value="">Выберите тип транспорта</option>
                         <option value="auto">Автомобильный</option>
@@ -684,12 +685,12 @@ function AutoTariffPage({ token }) {
                       </select>
                     </div>
 
-                    <div style={{ marginBottom: 12 }}>
-                      <label style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>Базис поставки:</label>
+                    <div className="form-group">
+                      <label className="form-label">Базис поставки:</label>
                       <select 
                         value={extractedData?.tariff_data?.basis || ''}
                         onChange={e => updateTariffField('basis', e.target.value)}
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '4px', border: '1px solid var(--border)' }}
+                        className="form-select"
                       >
                         <option value="">Выберите базис поставки</option>
                         <option value="EXW">EXW - Ex Works</option>
@@ -704,173 +705,173 @@ function AutoTariffPage({ token }) {
                       </select>
                     </div>
 
-                    <div style={{ marginBottom: 12 }}>
-                      <label style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>Тип ТС:</label>
+                    <div className="form-group">
+                      <label className="form-label">Тип ТС:</label>
                       <input 
                         type="text"
                         value={extractedData?.tariff_data?.vehicle_type || ''}
                         onChange={e => updateTariffField('vehicle_type', e.target.value)}
                         placeholder="Например: Тент 20т 82м3"
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '4px', border: '1px solid var(--border)' }}
+                        className="form-input"
                       />
                     </div>
                   </div>
 
                   {/* Общие цены и сроки */}
-                  <div>
+                  <div className="form-section">
                     <h5>Общие параметры</h5>
                     
-                    <div style={{ marginBottom: 12 }}>
-                      <label style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>Общая цена (RUB):</label>
+                    <div className="form-group">
+                      <label className="form-label">Общая цена (RUB):</label>
                       <input 
                         type="number"
                         step="0.01"
                         value={extractedData?.tariff_data?.price_rub || ''}
                         onChange={e => updateTariffField('price_rub', e.target.value ? parseFloat(e.target.value) : null)}
                         placeholder="0.00"
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '4px', border: '1px solid var(--border)' }}
+                        className="form-input"
                       />
                     </div>
 
-                    <div style={{ marginBottom: 12 }}>
-                      <label style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>Общая цена (USD):</label>
+                    <div className="form-group">
+                      <label className="form-label">Общая цена (USD):</label>
                       <input 
                         type="number"
                         step="0.01"
                         value={extractedData?.tariff_data?.price_usd || ''}
                         onChange={e => updateTariffField('price_usd', e.target.value ? parseFloat(e.target.value) : null)}
                         placeholder="0.00"
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '4px', border: '1px solid var(--border)' }}
+                        className="form-input"
                       />
                     </div>
 
-                    <div style={{ marginBottom: 12 }}>
-                      <label style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>Дата действия:</label>
+                    <div className="form-group">
+                      <label className="form-label">Дата действия:</label>
                       <input 
                         type="date"
                         value={formatDate(extractedData?.tariff_data?.validity_date)}
                         onChange={e => updateTariffField('validity_date', e.target.value)}
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '4px', border: '1px solid var(--border)' }}
+                        className="form-input"
                       />
                     </div>
 
-                    <div style={{ marginBottom: 12 }}>
-                      <label style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>Общее время в пути (дни):</label>
+                    <div className="form-group">
+                      <label className="form-label">Общее время в пути (дни):</label>
                       <input 
                         type="number"
                         value={extractedData?.tariff_data?.transit_time_days || ''}
                         onChange={e => updateTariffField('transit_time_days', e.target.value ? parseInt(e.target.value) : null)}
                         placeholder="0"
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '4px', border: '1px solid var(--border)' }}
+                        className="form-input"
                       />
                     </div>
                   </div>
 
                   {/* Дополнительные затраты */}
-                  <div>
+                  <div className="form-section">
                     <h5>Дополнительные затраты</h5>
                     
-                    <div style={{ marginBottom: 12 }}>
-                      <label style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>СВХ:</label>
+                    <div className="form-group">
+                      <label className="form-label">СВХ:</label>
                       <input 
                         type="number"
                         step="0.01"
                         value={extractedData?.tariff_data?.cbx_cost || ''}
                         onChange={e => updateTariffField('cbx_cost', e.target.value ? parseFloat(e.target.value) : null)}
                         placeholder="0.00"
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '4px', border: '1px solid var(--border)' }}
+                        className="form-input"
                       />
                     </div>
 
-                    <div style={{ marginBottom: 12 }}>
-                      <label style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>Терминальная обработка:</label>
+                    <div className="form-group">
+                      <label className="form-label">Терминальная обработка:</label>
                       <input 
                         type="number"
                         step="0.01"
                         value={extractedData?.tariff_data?.terminal_handling_cost || ''}
                         onChange={e => updateTariffField('terminal_handling_cost', e.target.value ? parseFloat(e.target.value) : null)}
                         placeholder="0.00"
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '4px', border: '1px solid var(--border)' }}
+                        className="form-input"
                       />
                     </div>
 
-                    <div style={{ marginBottom: 12 }}>
-                      <label style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>Автовывоз:</label>
+                    <div className="form-group">
+                      <label className="form-label">Автовывоз:</label>
                       <input 
                         type="number"
                         step="0.01"
                         value={extractedData?.tariff_data?.auto_pickup_cost || ''}
                         onChange={e => updateTariffField('auto_pickup_cost', e.target.value ? parseFloat(e.target.value) : null)}
                         placeholder="0.00"
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '4px', border: '1px solid var(--border)' }}
+                        className="form-input"
                       />
                     </div>
 
-                    <div style={{ marginBottom: 12 }}>
-                      <label style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>Охрана:</label>
+                    <div className="form-group">
+                      <label className="form-label">Охрана:</label>
                       <input 
                         type="number"
                         step="0.01"
                         value={extractedData?.tariff_data?.security_cost || ''}
                         onChange={e => updateTariffField('security_cost', e.target.value ? parseFloat(e.target.value) : null)}
                         placeholder="0.00"
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '4px', border: '1px solid var(--border)' }}
+                        className="form-input"
                       />
                     </div>
 
                     {/* Авиационные сборы */}
-                    <div style={{ marginBottom: 12 }}>
-                      <label style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>Парковка/Ворота:</label>
+                    <div className="form-group">
+                      <label className="form-label">Парковка/Ворота:</label>
                       <input 
                         type="number"
                         step="0.01"
                         value={extractedData?.tariff_data?.car_parking_cost || ''}
                         onChange={e => updateTariffField('car_parking_cost', e.target.value ? parseFloat(e.target.value) : null)}
                         placeholder="0.00"
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '4px', border: '1px solid var(--border)' }}
+                        className="form-input"
                       />
                     </div>
 
-                    <div style={{ marginBottom: 12 }}>
-                      <label style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>Обработка:</label>
+                    <div className="form-group">
+                      <label className="form-label">Обработка:</label>
                       <input 
                         type="number"
                         step="0.01"
                         value={extractedData?.tariff_data?.handling_cost || ''}
                         onChange={e => updateTariffField('handling_cost', e.target.value ? parseFloat(e.target.value) : null)}
                         placeholder="0.00"
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '4px', border: '1px solid var(--border)' }}
+                        className="form-input"
                       />
                     </div>
 
-                    <div style={{ marginBottom: 12 }}>
-                      <label style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>Декларация:</label>
+                    <div className="form-group">
+                      <label className="form-label">Декларация:</label>
                       <input 
                         type="number"
                         step="0.01"
                         value={extractedData?.tariff_data?.declaration_cost || ''}
                         onChange={e => updateTariffField('declaration_cost', e.target.value ? parseFloat(e.target.value) : null)}
                         placeholder="0.00"
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '4px', border: '1px solid var(--border)' }}
+                        className="form-input"
                       />
                     </div>
 
-                    <div style={{ marginBottom: 12 }}>
-                      <label style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>Регистрация:</label>
+                    <div className="form-group">
+                      <label className="form-label">Регистрация:</label>
                       <input 
                         type="number"
                         step="0.01"
                         value={extractedData?.tariff_data?.registration_cost || ''}
                         onChange={e => updateTariffField('registration_cost', e.target.value ? parseFloat(e.target.value) : null)}
                         placeholder="0.00"
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '4px', border: '1px solid var(--border)' }}
+                        className="form-input"
                       />
                     </div>
                   </div>
                 </div>
 
                 {/* Секция маршрутов */}
-                <div style={{ marginTop: 20 }}>
+                <div className="form-section" style={{ marginTop: 20 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                     <h5>Маршруты ({extractedData?.tariff_data?.routes?.length || 0})</h5>
                     <button 
@@ -883,10 +884,7 @@ function AutoTariffPage({ token }) {
                   </div>
 
                   {extractedData?.tariff_data?.routes?.map((route, index) => (
-                    <div key={index} style={{ 
-                      border: '1px solid var(--border)', 
-                      borderRadius: '8px', 
-                      padding: 16, 
+                    <div key={index} className="form-section" style={{ 
                       marginBottom: 16,
                       backgroundColor: 'var(--muted-surface)'
                     }}>
@@ -902,20 +900,20 @@ function AutoTariffPage({ token }) {
                         </button>
                       </div>
 
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
-                        <div>
-                          <label style={{ display: 'block', marginBottom: 4, fontWeight: 500, fontSize: '14px' }}>Страна отправления:</label>
+                      <div className="form-grid">
+                        <div className="form-group">
+                          <label className="form-label">Страна отправления:</label>
                           <input 
                             type="text"
                             value={route.origin_country || ''}
                             onChange={e => updateRouteField(index, 'origin_country', e.target.value)}
                             placeholder="Россия"
-                            style={{ width: '100%', padding: '6px 8px', borderRadius: '4px', border: '1px solid var(--border)', fontSize: '14px' }}
+                            className="form-input"
                           />
                         </div>
 
-                        <div>
-                          <label style={{ display: 'block', marginBottom: 4, fontWeight: 500, fontSize: '14px' }}>Город отправления:</label>
+                        <div className="form-group">
+                          <label className="form-label">Город отправления:</label>
                           <input 
                             type="text"
                             value={route.origin_city || ''}
