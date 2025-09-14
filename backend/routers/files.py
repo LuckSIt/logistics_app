@@ -6,7 +6,7 @@ from typing import List
 from backend.database import SessionLocal
 from backend import models, schemas
 from backend.services import parsers, cbr
-from backend.services.security import get_current_user
+from backend.services.security import get_current_user, can_add_tariffs
 import logging
 from typing import List
 
@@ -35,7 +35,7 @@ async def upload_tariffs(
     use_llm: bool = Form(False),  # Флаг для использования LLM парсера
     llm_model: str = Form("mistral"),  # Модель LLM
     db: Session = Depends(get_db),
-    _: models.User = Depends(get_current_user),
+    _: models.User = Depends(can_add_tariffs),
 ):
     """
     Загрузка и парсинг файлов тарифов

@@ -75,3 +75,108 @@ def require_admin(user: models.User = Depends(get_current_user)) -> models.User:
     return user
 
 
+def require_employee_or_admin(user: models.User = Depends(get_current_user)) -> models.User:
+    """
+    Проверка прав сотрудника или администратора
+    """
+    if user.role not in [models.UserRole.admin, models.UserRole.employee]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Требуются права сотрудника или администратора"
+        )
+    return user
+
+
+def require_forwarder_or_above(user: models.User = Depends(get_current_user)) -> models.User:
+    """
+    Проверка прав экспедитора или выше
+    """
+    if user.role not in [models.UserRole.admin, models.UserRole.employee, models.UserRole.forwarder]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Требуются права экспедитора или выше"
+        )
+    return user
+
+
+def require_client_or_above(user: models.User = Depends(get_current_user)) -> models.User:
+    """
+    Проверка прав клиента или выше (все пользователи)
+    """
+    return user
+
+
+def can_manage_users(user: models.User = Depends(get_current_user)) -> models.User:
+    """
+    Проверка прав на управление пользователями (только админ)
+    """
+    if user.role != models.UserRole.admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Только администратор может управлять пользователями"
+        )
+    return user
+
+
+def can_set_markups(user: models.User = Depends(get_current_user)) -> models.User:
+    """
+    Проверка прав на установку наценок (админ и сотрудник)
+    """
+    if user.role not in [models.UserRole.admin, models.UserRole.employee]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Только администратор и сотрудник могут устанавливать наценки"
+        )
+    return user
+
+
+def can_view_archive(user: models.User = Depends(get_current_user)) -> models.User:
+    """
+    Проверка прав на просмотр архива тарифов (админ и сотрудник)
+    """
+    if user.role not in [models.UserRole.admin, models.UserRole.employee]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Только администратор и сотрудник могут просматривать архив тарифов"
+        )
+    return user
+
+
+def can_view_request_history(user: models.User = Depends(get_current_user)) -> models.User:
+    """
+    Проверка прав на просмотр истории запросов (админ и сотрудник)
+    """
+    if user.role not in [models.UserRole.admin, models.UserRole.employee]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Только администратор и сотрудник могут просматривать историю запросов"
+        )
+    return user
+
+
+def can_add_tariffs(user: models.User = Depends(get_current_user)) -> models.User:
+    """
+    Проверка прав на добавление тарифов (все кроме клиента)
+    """
+    if user.role == models.UserRole.client:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Клиенты не могут добавлять тарифы"
+        )
+    return user
+
+
+def can_choose_transport(user: models.User = Depends(get_current_user)) -> models.User:
+    """
+    Проверка прав на выбор транспорта (все пользователи)
+    """
+    return user
+
+
+def can_download_kp(user: models.User = Depends(get_current_user)) -> models.User:
+    """
+    Проверка прав на скачивание КП (все пользователи)
+    """
+    return user
+
+

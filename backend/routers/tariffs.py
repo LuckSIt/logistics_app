@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from backend.database import SessionLocal
 from backend import models, schemas
-from backend.services.security import get_current_user
+from backend.services.security import get_current_user, can_add_tariffs, can_view_archive
 from backend.services.tariff_archive import TariffArchiveService
 
 router = APIRouter()
@@ -23,9 +23,10 @@ def list_tariffs(
     transport_type: Optional[schemas.TransportType] = None,
     origin_city: Optional[str] = None,
     destination_city: Optional[str] = None,
-    _: models.User = Depends(get_current_user),
+    current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    """Получить список тарифов (доступно всем пользователям)"""
     query = db.query(models.Tariff)
     if supplier_id:
         query = query.filter(models.Tariff.supplier_id == supplier_id)
@@ -40,6 +41,7 @@ def list_tariffs(
 
 @router.get("/id/{tariff_id}", response_model=schemas.TariffOut)
 def get_tariff(tariff_id: int, _: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Получить тариф по ID (доступно всем пользователям)"""
     t = db.query(models.Tariff).filter(models.Tariff.id == tariff_id).first()
     if not t:
         raise HTTPException(status_code=404, detail="Тариф не найден")
@@ -47,7 +49,8 @@ def get_tariff(tariff_id: int, _: models.User = Depends(get_current_user), db: S
 
 
 @router.put("/id/{tariff_id}", response_model=schemas.TariffOut)
-def update_tariff(tariff_id: int, payload: schemas.TariffIn, _: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+def update_tariff(tariff_id: int, payload: schemas.TariffIn, _: models.User = Depends(can_add_tariffs), db: Session = Depends(get_db)):
+    """Обновить тариф (доступно всем кроме клиентов)"""
     t = db.query(models.Tariff).filter(models.Tariff.id == tariff_id).first()
     if not t:
         raise HTTPException(status_code=404, detail="Тариф не найден")
@@ -59,13 +62,36 @@ def update_tariff(tariff_id: int, payload: schemas.TariffIn, _: models.User = De
 
 
 @router.delete("/id/{tariff_id}")
-def delete_tariff(tariff_id: int, _: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+def delete_tariff(tariff_id: int, _: models.User = Depends(can_add_tariffs), db: Session = Depends(get_db)):
+    """Удалить тариф (доступно всем кроме клиентов)"""
     t = db.query(models.Tariff).filter(models.Tariff.id == tariff_id).first()
     if not t:
         raise HTTPException(status_code=404, detail="Тариф не найден")
     db.delete(t)
     db.commit()
     return {"deleted": True}
+
+
+@router.get("/archive", response_model=List[schemas.TariffArchiveOut])
+def list_archived_tariffs(
+    supplier_id: Optional[int] = None,
+    transport_type: Optional[schemas.TransportType] = None,
+    origin_city: Optional[str] = None,
+    destination_city: Optional[str] = None,
+    _: models.User = Depends(can_view_archive),
+    db: Session = Depends(get_db),
+):
+    """Получить список архивных тарифов (только для админа и сотрудника)"""
+    query = db.query(models.TariffArchive)
+    if supplier_id:
+        query = query.filter(models.TariffArchive.supplier_id == supplier_id)
+    if transport_type:
+        query = query.filter(models.TariffArchive.transport_type == transport_type)
+    if origin_city:
+        query = query.filter(models.TariffArchive.origin_city == origin_city)
+    if destination_city:
+        query = query.filter(models.TariffArchive.destination_city == destination_city)
+    return query.order_by(models.TariffArchive.id.desc()).all()
 
 
 @router.post("/id/{tariff_id}/archive")

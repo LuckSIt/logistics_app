@@ -70,6 +70,72 @@ class UserOut(BaseModel):
         from_attributes = True
 
 
+class DiscountOut(BaseModel):
+    id: int
+    user_id: int
+    supplier_id: int
+    discount_percent: float
+
+    class Config:
+        from_attributes = True
+
+
+class RequestOut(BaseModel):
+    id: int
+    user_id: int
+    request_data: dict
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class CommercialOfferOut(BaseModel):
+    id: int
+    user_id: int
+    request_id: Optional[int] = None
+    file_path: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class TariffArchiveOut(BaseModel):
+    id: int
+    original_tariff_id: int
+    supplier_id: int
+    transport_type: TransportType
+    basis: str
+    origin_country: Optional[str] = None
+    origin_city: Optional[str] = None
+    border_point: Optional[str] = None
+    destination_country: Optional[str] = None
+    destination_city: Optional[str] = None
+    vehicle_type: Optional[str] = None
+    price_rub: Optional[float] = None
+    price_usd: Optional[float] = None
+    validity_date: Optional[date] = None
+    currency_conversion: Optional[float] = None
+    transit_time_days: Optional[int] = None
+    source_file: Optional[str] = None
+    transit_port: Optional[str] = None
+    departure_station: Optional[str] = None
+    arrival_station: Optional[str] = None
+    rail_tariff_rub: Optional[float] = None
+    cbx_cost: Optional[float] = None
+    terminal_handling_cost: Optional[float] = None
+    auto_pickup_cost: Optional[float] = None
+    security_cost: Optional[float] = None
+    precarriage_cost: Optional[float] = None
+    archived_at: datetime
+    archive_reason: Optional[str] = None
+    is_active: bool
+
+    class Config:
+        from_attributes = True
+
+
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"

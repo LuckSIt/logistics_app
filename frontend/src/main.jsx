@@ -11,6 +11,8 @@ import SeaTransportPage from './sea-transport.jsx'
 import AirTransportPage from './air-transport.jsx'
 import MultimodalTransportPage from './multimodal-transport.jsx'
 import TransportSelectorPage from './transport-selector.jsx'
+import UserManagement from './components/UserManagement.jsx'
+import MarkupManagement from './components/MarkupManagement.jsx'
 
 const API_BASE = import.meta.env.VITE_API || 'http://127.0.0.1:8000'
 axios.defaults.baseURL = API_BASE
@@ -38,6 +40,26 @@ axios.interceptors.response.use(
 function useAuth() {
   const [token, setToken] = React.useState(localStorage.getItem('token') || '')
   const [user, setUser] = React.useState(null)
+
+  // Загружаем информацию о пользователе при инициализации
+  React.useEffect(() => {
+    const loadUser = async () => {
+      const t = localStorage.getItem('token')
+      if (t) {
+        try {
+          const response = await axios.get('/auth/me', {
+            headers: { 'Authorization': `Bearer ${t}` }
+          })
+          setUser(response.data)
+        } catch (err) {
+          // Если токен недействителен, удаляем его
+          localStorage.removeItem('token')
+          setToken('')
+        }
+      }
+    }
+    loadUser()
+  }, [])
 
   const login = async (username, password) => {
     const params = new URLSearchParams()
@@ -108,17 +130,47 @@ function Header({ user, onLogout, onToggleSidebar, sidebarOpen }) {
   )
 }
 
-function Sidebar({ onLogout, isOpen, onClose }) {
+function Sidebar({ user, onLogout, isOpen, onClose }) {
   const nav = useNavigate()
   const location = window.location.pathname
   
-  const navItems = [
-    { to: "/transport-selector", icon: "🚛", label: "Выбор транспорта", desc: "Выберите тип перевозки" },
-    { to: "/auto-tariff", icon: "🤖", label: "Авто-тарифы", desc: "ИИ создание тарифов" },
-    { to: "/history", icon: "📜", label: "История", desc: "История запросов" },
-    { to: "/archive", icon: "📑", label: "Архив", desc: "Архив тарифов" },
-    { to: "/settings", icon: "⚙", label: "Настройки", desc: "Настройки системы" }
+  // Базовые пункты меню для всех пользователей
+  const baseNavItems = [
+    { to: "/transport-selector", icon: "🚛", label: "Выбор транспорта", desc: "Выберите тип перевозки", roles: ['admin', 'employee', 'forwarder', 'client'] }
   ]
+  
+  // Пункты меню для разных ролей
+  const roleNavItems = {
+    admin: [
+      { to: "/auto-tariff", icon: "🤖", label: "Авто-тарифы", desc: "ИИ создание тарифов" },
+      { to: "/user-management", icon: "👥", label: "Пользователи", desc: "Управление пользователями" },
+      { to: "/markup-management", icon: "💰", label: "Наценки", desc: "Управление наценками" },
+      { to: "/history", icon: "📊", label: "История запросов", desc: "История и статистика" },
+      { to: "/archive", icon: "📑", label: "Архив", desc: "Архив тарифов" }
+    ],
+    employee: [
+      { to: "/auto-tariff", icon: "🤖", label: "Авто-тарифы", desc: "ИИ создание тарифов" },
+      { to: "/user-management", icon: "👥", label: "Пользователи", desc: "Управление экспедиторами и клиентами" },
+      { to: "/markup-management", icon: "💰", label: "Наценки", desc: "Управление наценками" },
+      { to: "/history", icon: "📊", label: "История запросов", desc: "История и статистика" },
+      { to: "/archive", icon: "📑", label: "Архив", desc: "Архив тарифов" }
+    ],
+    forwarder: [
+      { to: "/auto-tariff", icon: "🤖", label: "Авто-тарифы", desc: "ИИ создание тарифов" }
+    ],
+    client: [
+      { to: "/history", icon: "📊", label: "История запросов", desc: "История и статистика" }
+    ]
+  }
+  
+  // Объединяем пункты меню в зависимости от роли
+  const getNavItems = () => {
+    const userRole = user?.role || 'client'
+    const roleItems = roleNavItems[userRole] || []
+    return [...baseNavItems, ...roleItems]
+  }
+  
+  const navItems = getNavItems()
   
   const handleLinkClick = () => {
     // Закрываем меню при клике на ссылку на мобильных устройствах
@@ -172,7 +224,7 @@ function Sidebar({ onLogout, isOpen, onClose }) {
   )
 }
 
-function Dashboard({ stats }) {
+function Dashboard({ stats, user }) {
   const navigate = useNavigate()
   
   const handleNavigation = (path) => {
@@ -235,32 +287,36 @@ function Dashboard({ stats }) {
             Перейти
           </button>
         </div>
-        <div className="action-card">
-          <div className="action-icon">🤖</div>
-          <div className="action-content">
-            <h3>Авто-тарифы</h3>
-            <p>Создайте тарифы автоматически с помощью ИИ</p>
+        {user?.role !== 'client' && (
+          <div className="action-card">
+            <div className="action-icon">🤖</div>
+            <div className="action-content">
+              <h3>Авто-тарифы</h3>
+              <p>Создайте тарифы автоматически с помощью ИИ</p>
+            </div>
+            <button 
+              className="action-btn"
+              onClick={() => handleNavigation('/auto-tariff')}
+            >
+              Создать
+            </button>
           </div>
-          <button 
-            className="action-btn"
-            onClick={() => handleNavigation('/auto-tariff')}
-          >
-            Создать
-          </button>
-        </div>
-        <div className="action-card">
-          <div className="action-icon">📈</div>
-          <div className="action-content">
-            <h3>Аналитика</h3>
-            <p>Просмотрите статистику и отчеты по тарифам</p>
+        )}
+        {user?.role !== 'forwarder' && (
+          <div className="action-card">
+            <div className="action-icon">📈</div>
+            <div className="action-content">
+              <h3>Аналитика</h3>
+              <p>Просмотрите статистику и отчеты по тарифам</p>
+            </div>
+            <button 
+              className="action-btn"
+              onClick={() => handleNavigation('/history')}
+            >
+              Открыть
+            </button>
           </div>
-          <button 
-            className="action-btn"
-            onClick={() => handleNavigation('/history')}
-          >
-            Открыть
-          </button>
-        </div>
+        )}
       </div>
     </div>
   )
@@ -283,16 +339,45 @@ function HistoryPage({ token, user }) {
   React.useEffect(() => { if (token) load() }, [token])
 
   const downloadKP = async (req) => {
-    const gen = await axios.post('/offers/generate', { user_id: user?.id, request: req.request_data }, { baseURL: API_BASE, headers: { Authorization: `Bearer ${token}` } })
-    const offerId = gen.data.id
-    const resp = await axios.get(`/offers/${offerId}/download`, { baseURL: API_BASE, headers: { Authorization: `Bearer ${token}` }, responseType: 'blob' })
-    const blob = new Blob([resp.data], { type: 'application/pdf' })
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `offer_${offerId}.pdf`
-    a.click()
-    window.URL.revokeObjectURL(url)
+    try {
+      // Сначала получаем результаты расчета для этого запроса
+      const calculateResponse = await axios.post('/calculate', req.request_data, { 
+        baseURL: API_BASE, 
+        headers: { Authorization: `Bearer ${token}` } 
+      })
+      
+      const results = calculateResponse.data
+      
+      // Теперь генерируем КП с результатами расчета
+      const gen = await axios.post('/offers/generate', { 
+        request: { 
+          ...req.request_data, 
+          selected_tariffs: results,
+          results: results
+        }
+      }, { 
+        baseURL: API_BASE, 
+        headers: { Authorization: `Bearer ${token}` } 
+      })
+      
+      const offerId = gen.data.id
+      const resp = await axios.get(`/offers/${offerId}/download`, { 
+        baseURL: API_BASE, 
+        headers: { Authorization: `Bearer ${token}` }, 
+        responseType: 'blob' 
+      })
+      
+      const blob = new Blob([resp.data], { type: 'application/pdf' })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `offer_${offerId}.pdf`
+      a.click()
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Ошибка генерации КП:', error)
+      alert('Ошибка при генерации КП: ' + (error.response?.data?.detail || error.message))
+    }
   }
 
   return (
@@ -308,16 +393,42 @@ function HistoryPage({ token, user }) {
                   <th>Вид</th>
                   <th>Маршрут</th>
                   <th>Базис</th>
+                  {(user?.role === 'admin' || user?.role === 'employee') && <th>Клиент</th>}
                   <th></th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map(r => (
                   <tr key={r.id}>
-                    <td>{new Date(r.created_at).toLocaleString()}</td>
+                    <td>{(() => {
+                      const date = new Date(r.created_at);
+                      // Добавляем 3 часа для московского времени
+                      const moscowTime = new Date(date.getTime() + (3 * 60 * 60 * 1000));
+                      return moscowTime.toLocaleString('ru-RU', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: false
+                      });
+                    })()}</td>
                     <td>{r.request_data?.transport_type || '-'}</td>
                     <td>{(r.request_data?.origin_city||'-') + ' → ' + (r.request_data?.destination_city||'-')}</td>
                     <td>{r.request_data?.basis || '-'}</td>
+                    {(user?.role === 'admin' || user?.role === 'employee') && (
+                      <td>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                          <span style={{ fontWeight: 'bold' }}>{r.user?.full_name || r.user?.username || 'Неизвестно'}</span>
+                          {r.user?.company_name && (
+                            <span style={{ fontSize: '0.8em', color: 'var(--text-muted)' }}>
+                              {r.user.company_name}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                    )}
                     <td><button className="btn btn-secondary" onClick={()=>downloadKP(r)}>Скачать КП</button></td>
                   </tr>
                 ))}
@@ -362,6 +473,7 @@ function ArchivePage({ token }) {
                     <th>Базис</th>
                     <th>Цена (RUB)</th>
                     <th>Цена (USD)</th>
+                    <th>Создатель</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -374,6 +486,18 @@ function ArchivePage({ token }) {
                     <td>{r.basis || '-'}</td>
                     <td>{r.price_rub ? `${r.price_rub.toLocaleString('ru-RU')} ₽` : '-'}</td>
                     <td>{r.price_usd ? `$${r.price_usd.toLocaleString('ru-RU')}` : '-'}</td>
+                    <td>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                        <span style={{ fontWeight: 'bold' }}>{r.created_by || 'Система'}</span>
+                        {r.created_by_role && (
+                          <span style={{ fontSize: '0.8em', color: 'var(--text-muted)' }}>
+                            {r.created_by_role === 'forwarder' ? 'Экспедитор' : 
+                             r.created_by_role === 'employee' ? 'Сотрудник' : 
+                             r.created_by_role === 'admin' ? 'Администратор' : r.created_by_role}
+                          </span>
+                        )}
+                      </div>
+                    </td>
                     </tr>
                   ))}
                 </tbody>
@@ -585,11 +709,24 @@ function AuthPage({ onLogin, mode = 'client' }) {
                   type="button"
                   className="demo-button"
                   onClick={() => {
-                    setUsername(mode === 'admin' ? 'admin' : 'client')
-                    setPassword(mode === 'admin' ? 'admin123' : 'client123')
+                    setUsername('admin')
+                    setPassword('admin123')
                   }}
                 >
-                  {mode === 'admin' ? 'admin / admin123' : 'client / client123'}
+                  admin / admin123
+                </button>
+              </div>
+              <div className="demo-account">
+                <div className="demo-badge employee">👨‍💼 Сотрудник</div>
+                <button 
+                  type="button"
+                  className="demo-button"
+                  onClick={() => {
+                    setUsername('employee1')
+                    setPassword('employee123')
+                  }}
+                >
+                  employee1 / employee123
                 </button>
               </div>
               <div className="demo-account">
@@ -598,11 +735,24 @@ function AuthPage({ onLogin, mode = 'client' }) {
                   type="button"
                   className="demo-button"
                   onClick={() => {
-                    setUsername('forwarder')
+                    setUsername('forwarder1')
                     setPassword('forwarder123')
                   }}
                 >
-                  forwarder / forwarder123
+                  forwarder1 / forwarder123
+                </button>
+              </div>
+              <div className="demo-account">
+                <div className="demo-badge client">👤 Клиент</div>
+                <button 
+                  type="button"
+                  className="demo-button"
+                  onClick={() => {
+                    setUsername('client1')
+                    setPassword('client123')
+                  }}
+                >
+                  client1 / client123
                 </button>
               </div>
             </div>
@@ -646,6 +796,7 @@ function Layout({ auth, children }) {
       />
       <div className="layout-body">
         <Sidebar 
+          user={auth.user}
           onLogout={auth.logout} 
           isOpen={sidebarOpen}
           onClose={closeSidebar}
@@ -690,7 +841,7 @@ function App() {
           </>
         ) : (
           <>
-            <Route path="/" element={<Layout auth={auth}><Dashboard stats={stats} /></Layout>} />
+            <Route path="/" element={<Layout auth={auth}><Dashboard stats={stats} user={auth.user} /></Layout>} />
             <Route path="/transport-selector" element={<Layout auth={auth}><TransportSelectorPage token={auth.token} user={auth.user} /></Layout>} />
             <Route path="/auto-transport" element={<Layout auth={auth}><AutoTransportPage token={auth.token} user={auth.user} /></Layout>} />
             <Route path="/railway-transport" element={<Layout auth={auth}><RailwayTransportPage token={auth.token} user={auth.user} /></Layout>} />
@@ -701,6 +852,9 @@ function App() {
             <Route path="/history" element={<Layout auth={auth}><HistoryPage token={auth.token} user={auth.user} /></Layout>} />
             <Route path="/archive" element={<Layout auth={auth}><ArchivePage token={auth.token} /></Layout>} />
             <Route path="/settings" element={<Layout auth={auth}><SettingsPage token={auth.token} user={auth.user} /></Layout>} />
+            {/* Маршруты для системы пользователей */}
+            <Route path="/user-management" element={<Layout auth={auth}><UserManagement user={auth.user} /></Layout>} />
+            <Route path="/markup-management" element={<Layout auth={auth}><MarkupManagement user={auth.user} /></Layout>} />
             <Route path="*" element={<Navigate to="/" />} />
           </>
         )}

@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from backend.database import SessionLocal
 from backend import models, schemas
-from backend.services.security import get_current_user
+from backend.services.security import get_current_user, can_choose_transport, can_download_kp
 from backend.services import cbr
 from backend.services.tariff_archive import TariffArchiveService
 
@@ -19,7 +19,7 @@ def get_db():
 
 
 @router.post("/", response_model=List[schemas.CalculateOption])
-def calculate_quote(request: schemas.CalculateRequest, current: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+def calculate_quote(request: schemas.CalculateRequest, current: models.User = Depends(can_choose_transport), db: Session = Depends(get_db)):
     import logging
     logger = logging.getLogger(__name__)
     
@@ -359,7 +359,7 @@ def get_svh_name(city: str, db: Session) -> str:
 
 
 @router.post("/calculate/mass")
-def calculate_mass(request: schemas.CalculateMassRequest, current: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+def calculate_mass(request: schemas.CalculateMassRequest, current: models.User = Depends(can_choose_transport), db: Session = Depends(get_db)):
     all_results = []
     for r in request.requests:
         all_results.append(calculate_quote(r, current, db))
