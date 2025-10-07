@@ -11,7 +11,7 @@ from sqlalchemy.orm import sessionmaker
 # Добавляем текущую директорию в путь
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from .database import DATABASE_URL, engine
+from database import DATABASE_URL, engine
 
 def update_database_schema():
     """Обновляет схему базы данных"""

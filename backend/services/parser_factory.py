@@ -1,11 +1,11 @@
 from typing import Dict, Type
-from .base_parser import BaseParser
-from .auto_parser import AutoParser
-from .railway_parser import RailwayParser
-from .sea_parser import SeaParser
-from .air_parser import AirParser
-from .multimodal_parser import MultimodalParser
-from .llm_parser import LLMTariffParser
+from base_parser import BaseParser
+from auto_parser import AutoParser
+from railway_parser import RailwayParser
+from sea_parser import SeaParser
+from air_parser import AirParser
+from multimodal_parser import MultimodalParser
+from llm_parser import LLMTariffParser
 
 class ParserFactory:
     """
@@ -47,7 +47,7 @@ class ParserFactory:
         if not content:
             # Если контент не передан, пытаемся извлечь из файла
             try:
-                from .parsers import extract_text_from_file
+                from parsers import extract_text_from_file
                 content = extract_text_from_file(file_path)
             except Exception:
                 return 'auto'  # По умолчанию

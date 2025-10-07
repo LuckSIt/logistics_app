@@ -4,10 +4,10 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
-from ..database import SessionLocal
-from .. import models, schemas
-from ..services.security import get_current_user
-from ..services.documents import generate_docx, generate_pdf
+from database import SessionLocal
+import models, schemas
+from services.security import get_current_user
+from services.documents import generate_docx, generate_pdf
 
 router = APIRouter()
 

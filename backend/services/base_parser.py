@@ -75,7 +75,7 @@ class BaseParser(ABC):
         """
         Универсальная функция для извлечения текста из файлов
         """
-        from .parsers import extract_text_from_file
+        from parsers import extract_text_from_file
         return extract_text_from_file(file_path)
     
     def clean_text(self, text: str) -> str:

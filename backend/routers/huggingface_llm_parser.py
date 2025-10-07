@@ -11,11 +11,11 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
-from ..database import SessionLocal
-from .. import models, schemas
-from ..services.security import get_current_user, can_add_tariffs
-from ..services.enhanced_ocr_service import enhanced_ocr_service
-from ..services.huggingface_llm_analyzer import huggingface_llm_analyzer
+from database import SessionLocal
+import models, schemas
+from services.security import get_current_user, can_add_tariffs
+from services.enhanced_ocr_service import enhanced_ocr_service
+from services.huggingface_llm_analyzer import huggingface_llm_analyzer
 from datetime import datetime
 
 logger = logging.getLogger(__name__)

@@ -44,7 +44,7 @@ def parse_tariff_file(file_path: str, supplier_id: int) -> List[Dict[str, Any]]:
     
     try:
         # Используем фабрику парсеров для автоматического определения типа транспорта
-        from .parser_factory import ParserFactory
+        from parser_factory import ParserFactory
         
         # Определяем тип транспорта и парсим данные
         result = ParserFactory.parse_with_auto_detection(file_path, supplier_id)

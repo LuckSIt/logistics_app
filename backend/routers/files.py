@@ -3,10 +3,10 @@ from datetime import date
 from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Form
 from sqlalchemy.orm import Session
 from typing import List
-from ..database import SessionLocal
-from .. import models, schemas
+from database import SessionLocal
+import models, schemas
 from ..services import parsers, cbr
-from ..services.security import get_current_user, can_add_tariffs
+from services.security import get_current_user, can_add_tariffs
 import logging
 from typing import List
 

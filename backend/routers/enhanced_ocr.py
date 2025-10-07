@@ -9,11 +9,11 @@ from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Form, B
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
-from ..database import SessionLocal
-from .. import models, schemas
-from ..services.security import get_current_user, can_add_tariffs
-from ..services.enhanced_ocr_service import enhanced_ocr_service
-from ..services.intelligent_parser import intelligent_parser
+from database import SessionLocal
+import models, schemas
+from services.security import get_current_user, can_add_tariffs
+from services.enhanced_ocr_service import enhanced_ocr_service
+from services.intelligent_parser import intelligent_parser
 from datetime import datetime
 
 logger = logging.getLogger(__name__)

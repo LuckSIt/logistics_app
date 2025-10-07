@@ -47,7 +47,7 @@ class HuggingFaceLLMAnalyzer:
             class AdvancedTariffParser:
                 def __init__(self):
                     # Загружаем паттерны из intelligent_parser
-                    from .intelligent_parser import IntelligentParser
+                    from intelligent_parser import IntelligentParser
                     self.parser = IntelligentParser()
 
                 def __call__(self, prompt, **kwargs):
@@ -343,7 +343,7 @@ class HuggingFaceLLMAnalyzer:
         """Шаг 1: Извлечение базовых данных с помощью парсера"""
         try:
             # Импортируем парсер фабрику
-            from .parser_factory import ParserFactory
+            from parser_factory import ParserFactory
 
             # Создаем парсер для указанного типа транспорта
             parser = ParserFactory.get_parser(transport_type)
@@ -612,7 +612,7 @@ Return only valid JSON:
         """Fallback парсинг без LLM"""
         try:
             # Импортируем только при необходимости, чтобы избежать циклических импортов
-            from .intelligent_parser import IntelligentParser
+            from intelligent_parser import IntelligentParser
             parser = IntelligentParser()
             result = parser.parse_file(text, transport_type)
             if result.get('success', True):  # Если success не False, считаем успешным
@@ -645,7 +645,7 @@ Return only valid JSON:
         """Улучшенный fallback парсинг с контекстным анализом"""
         try:
             # Импортируем только при необходимости
-            from .intelligent_parser import IntelligentParser
+            from intelligent_parser import IntelligentParser
 
             # Используем intelligent_parser как основу
             parser = IntelligentParser()

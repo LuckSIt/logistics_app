@@ -3,10 +3,10 @@ import logging
 from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Form
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from ..database import SessionLocal
-from .. import models, schemas
-from ..services.security import get_current_user
-from ..services.llm_parser import LLMTariffParser
+from database import SessionLocal
+import models, schemas
+from services.security import get_current_user
+from services.llm_parser import LLMTariffParser
 from ..services import cbr
 
 logger = logging.getLogger(__name__)

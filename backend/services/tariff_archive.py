@@ -5,8 +5,8 @@
 from datetime import datetime
 from typing import List, Optional
 from sqlalchemy.orm import Session
-from .. import models
-from ..schemas import TransportType
+import models
+from schemas import TransportType
 
 
 class TariffArchiveService:

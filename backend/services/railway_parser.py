@@ -7,8 +7,8 @@
 import re
 import logging
 from typing import List, Dict, Any, Optional
-from .base_parser import BaseParser
-from .railway_analyzer import RailwayAnalyzer
+from base_parser import BaseParser
+from railway_analyzer import RailwayAnalyzer
 
 logger = logging.getLogger(__name__)
 

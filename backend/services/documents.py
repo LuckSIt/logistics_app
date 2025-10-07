@@ -30,7 +30,7 @@ try:
     _pdfdoc.md5 = _safe_md5  # ignore unsupported usedforsecurity kwarg
 except Exception:
     pass
-from ..schemas import CalculateOption
+from schemas import CalculateOption
 
 
 def _get_value(opt: Any, key: str, default=None):
@@ -528,7 +528,7 @@ def _build_commercial_proposal_paragraphs(req: Dict[str, Any], opt: Dict[str, An
         logger.info(f"Данные тарифа: {opt}")
         
         # Используем новый менеджер шаблонов
-        from .kp_templates import kp_template_manager
+        from kp_templates import kp_template_manager
         
         # Генерируем текст КП на основе шаблона
         kp_text = kp_template_manager.generate_kp_text(transport_type, basis, req, opt)

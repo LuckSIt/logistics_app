@@ -1,7 +1,7 @@
 from typing import List, Dict, Any, Optional
 import pandas as pd
 import re
-from .base_parser import BaseParser
+from base_parser import BaseParser
 
 class AutoParser(BaseParser):
     """

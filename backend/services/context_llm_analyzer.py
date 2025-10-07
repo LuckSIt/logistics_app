@@ -273,7 +273,7 @@ class ContextLLMAnalyzer:
         """Fallback парсинг без LLM"""
         try:
             # Импортируем только при необходимости, чтобы избежать циклических импортов
-            from .intelligent_parser import intelligent_parser
+            from intelligent_parser import intelligent_parser
             result = intelligent_parser.parse_text(text, transport_type)
             if result.get('success', True):  # Если success не False, считаем успешным
                 return result

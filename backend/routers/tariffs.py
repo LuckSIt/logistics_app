@@ -1,10 +1,10 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from ..database import SessionLocal
-from .. import models, schemas
-from ..services.security import get_current_user, can_add_tariffs, can_view_archive
-from ..services.tariff_archive import TariffArchiveService
+from database import SessionLocal
+import models, schemas
+from services.security import get_current_user, can_add_tariffs, can_view_archive
+from services.tariff_archive import TariffArchiveService
 
 router = APIRouter()
 

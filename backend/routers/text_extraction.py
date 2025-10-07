@@ -8,10 +8,10 @@ from typing import List, Dict, Any
 from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Form
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
-from ..database import SessionLocal
-from .. import models
-from ..services.security import get_current_user
-from ..services.text_extractor import extract_text_from_file, get_supported_formats, is_format_supported
+from database import SessionLocal
+import models
+from services.security import get_current_user
+from services.text_extractor import extract_text_from_file, get_supported_formats, is_format_supported
 
 logger = logging.getLogger(__name__)
 

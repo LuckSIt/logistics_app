@@ -2,10 +2,10 @@ import os
 import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import users  # импортируем router
-from .routers import auth, contractors, files, quotes, tariffs, reference, offers, currency, requests_history, discounts, text_extraction, auto_tariff, llm_parser, markups, request_history, stats, enhanced_ocr, context_llm_parser, huggingface_llm_parser
-from .database import Base, engine
-from . import models
+from routers import users  # импортируем router
+from routers import auth, contractors, files, quotes, tariffs, reference, offers, currency, requests_history, discounts, text_extraction, auto_tariff, llm_parser, markups, request_history, stats, enhanced_ocr, context_llm_parser, huggingface_llm_parser
+from database import Base, engine
+import models
 
 # Настройка логирования
 logging.basicConfig(

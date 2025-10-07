@@ -6,7 +6,7 @@
 
 import re
 from typing import Dict, List, Optional, Any
-from .adaptive_analyzer import analyze_tariff_text_adaptive
+from adaptive_analyzer import analyze_tariff_text_adaptive
 
 class SeaAnalyzer:
     """Специализированный анализатор для морских тарифов."""

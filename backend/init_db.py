@@ -12,8 +12,8 @@ from passlib.context import CryptContext
 # Добавляем текущую директорию в путь
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from .database import Base, engine
-from . import models
+from database import Base, engine
+import models
 
 # Создаем контекст для хеширования паролей
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

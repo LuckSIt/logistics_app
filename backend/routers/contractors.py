@@ -4,9 +4,9 @@ from typing import List
 import os
 import re
 from pathlib import Path
-from ..database import SessionLocal
-from .. import models, schemas
-from ..services.security import get_current_user, can_set_markups
+from database import SessionLocal
+import models, schemas
+from services.security import get_current_user, can_set_markups
 
 router = APIRouter()
 

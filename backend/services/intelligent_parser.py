@@ -10,9 +10,9 @@ from datetime import datetime, date
 import json
 import traceback
 
-from .enhanced_ocr_service import enhanced_ocr_service
-from .. import models, schemas
-from ..database import SessionLocal
+from enhanced_ocr_service import enhanced_ocr_service
+import models, schemas
+from database import SessionLocal
 
 logger = logging.getLogger(__name__)
 
