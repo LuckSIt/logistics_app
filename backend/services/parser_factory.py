@@ -1,5 +1,5 @@
 from typing import Dict, Type
-from base_parser import BaseParser
+from services.base_parser import BaseParser
 from auto_parser import AutoParser
 from railway_parser import RailwayParser
 from sea_parser import SeaParser

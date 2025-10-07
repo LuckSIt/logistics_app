@@ -4,7 +4,7 @@
 
 from typing import Dict, Any, Optional
 from datetime import date, datetime
-from pricing import calc_air_costs, volumetric_weight, format_number, coerce_days, calc_sum_rub, build_formula
+from services.pricing import calc_air_costs, volumetric_weight, format_number, coerce_days, calc_sum_rub, build_formula
 import re
 
 class KPTemplateManager:
