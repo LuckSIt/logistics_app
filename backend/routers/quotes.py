@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from database import SessionLocal
 import models, schemas
 from services.security import get_current_user, can_choose_transport, can_download_kp
-from ..services import cbr
+from services import cbr
 from services.tariff_archive import TariffArchiveService
 
 router = APIRouter()

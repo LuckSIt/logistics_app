@@ -7,7 +7,7 @@ from database import SessionLocal
 import models, schemas
 from services.security import get_current_user
 from services.llm_parser import LLMTariffParser
-from ..services import cbr
+from services import cbr
 
 logger = logging.getLogger(__name__)
 
