@@ -20,38 +20,42 @@ services:
         generateValue: true
       - key: PORT
         value: 8000
-    disk:
-      name: veres-data
-      mountPath: /app/data
-      sizeGB: 1
+    # ВАЖНО: Persistent disks не поддерживаются на free tier!
+    # БД будет пересоздаваться при каждом деплое.
+    # Для продакшена обновитесь до Starter ($7/мес) и раскомментируйте:
+    # disk:
+    #   name: veres-data
+    #   mountPath: /app/data
+    #   sizeGB: 1
 
-  # Frontend Static Site (альтернативный вариант - Static Site вместо Docker)
-  # - type: web
-  #   name: veres-frontend
-  #   runtime: static
-  #   buildCommand: cd frontend && npm install && npm run build
-  #   staticPublishPath: frontend/dist
-  #   pullRequestPreviewsEnabled: true
-  #   headers:
-  #     - path: /*
-  #       name: Cache-Control
-  #       value: public, max-age=0, must-revalidate
-  #     - path: /assets/*
-  #       name: Cache-Control
-  #       value: public, max-age=31536000, immutable
-  #   routes:
-  #     - type: rewrite
-  #       source: /*
-  #       destination: /index.html
-
-  # Frontend Web Service (если используете Docker)
+  # Frontend Static Site (РЕКОМЕНДУЕТСЯ для free tier - экономит ресурсы)
   - type: web
     name: veres-frontend
-    runtime: docker
-    dockerfilePath: ./Dockerfile.frontend
-    dockerContext: .
-    plan: free
-    region: frankfurt
-    branch: main
-    healthCheckPath: /
+    runtime: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/dist
+    pullRequestPreviewsEnabled: true
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=0, must-revalidate
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+  # Frontend Web Service через Docker (альтернатива - используйте если нужен nginx)
+  # ВНИМАНИЕ: Закомментируйте Static Site выше если используете этот вариант!
+  # - type: web
+  #   name: veres-frontend-docker
+  #   runtime: docker
+  #   dockerfilePath: ./Dockerfile.frontend
+  #   dockerContext: .
+  #   plan: free
+  #   region: frankfurt
+  #   branch: main
+  #   healthCheckPath: /
 
