@@ -1,0 +1,15 @@
+{
+  "pythonVersion": "3.8",
+  "pythonPlatform": "Windows",
+  "executionEnvironments": [
+    {
+      "root": "backend"
+    }
+  ],
+  "typeCheckingMode": "basic",
+  "reportMissingImports": "warning",
+  "reportMissingTypeStubs": false,
+  "reportUnusedImport": false,
+  "reportUnusedVariable": false
+}
+
