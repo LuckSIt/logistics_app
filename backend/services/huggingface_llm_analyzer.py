@@ -6,9 +6,12 @@
 import logging
 import json
 import re
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Union, TYPE_CHECKING
 from datetime import datetime
 import traceback
+
+if TYPE_CHECKING:
+    from transformers import Pipeline
 
 logger = logging.getLogger(__name__)
 
@@ -18,9 +21,9 @@ class HuggingFaceLLMAnalyzer:
     """
     
     def __init__(self):
-        self.llm_available = False
-        self.pipeline = None
-        self.fallback_mode = False
+        self.llm_available: bool = False
+        self.pipeline: Optional[Any] = None  # Может быть Pipeline или AdvancedTariffParser
+        self.fallback_mode: bool = False
         self._init_llm()
         
     def _init_llm(self):
@@ -209,12 +212,18 @@ class HuggingFaceLLMAnalyzer:
             
             # Загружаем модель и токенизатор по отдельности
             tokenizer = GPT2Tokenizer.from_pretrained('distilgpt2')
-            model = GPT2LMHeadModel.from_pretrained('distilgpt2')
+            loaded_model = GPT2LMHeadModel.from_pretrained('distilgpt2')
+            
+            # Обрабатываем случай, когда from_pretrained возвращает кортеж
+            if isinstance(loaded_model, tuple):
+                model = loaded_model[0]
+            else:
+                model = loaded_model
             
             # Создаем pipeline
             self.pipeline = pipeline(
                 "text-generation",
-                model=model,
+                model=model,  # type: ignore
                 tokenizer=tokenizer,
                 max_length=128,
                 do_sample=True,
@@ -486,7 +495,7 @@ Return only valid JSON:
             )
             
             # Извлекаем сгенерированный текст
-            generated_text = response[0]['generated_text']
+            generated_text: str = str(response[0].get('generated_text', ''))
             
             # Убираем исходный промпт из ответа
             if generated_text.startswith(prompt):
@@ -696,6 +705,35 @@ Return only valid JSON:
         except Exception as e:
             logger.error(f"Ошибка улучшения контекста: {e}")
             return data
+    
+    def _simple_parse(self, text: str, transport_type: str) -> Dict[str, Any]:
+        """Простой fallback парсинг без LLM"""
+        try:
+            data: Dict[str, Any] = {}
+            
+            # Извлекаем города
+            cities = re.findall(r'\b[A-ZА-Я][a-zа-я]+(?:\s+[A-ZА-Я][a-zа-я]+)*\b', text)
+            cities = [city for city in cities if len(city) > 3]
+            if len(cities) >= 2:
+                data['origin_city'] = cities[0]
+                data['destination_city'] = cities[-1]
+            
+            # Извлекаем цены
+            prices = re.findall(r'\b(\d+(?:[.,]\d+)?)\s*(?:руб|рубл|₽|RUB|долл|\$|USD)', text, re.IGNORECASE)
+            if prices:
+                price_str, currency = prices[0] if isinstance(prices[0], tuple) else (prices[0], 'RUB')
+                if any(c in str(currency).lower() for c in ['usd', '$']):
+                    data['price_usd'] = price_str
+                else:
+                    data['price_rub'] = price_str
+            
+            # Базис по умолчанию
+            data['basis'] = data.get('basis', 'EXW')
+            
+            return data
+        except Exception as e:
+            logger.error(f"Ошибка простого парсинга: {e}")
+            return {'origin_city': '', 'destination_city': '', 'basis': 'EXW'}
     
     def _extract_cities_from_text(self, text: str) -> List[str]:
         """Извлечение городов из текста"""
