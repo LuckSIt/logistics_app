@@ -1,7 +1,7 @@
 from typing import List, Dict, Any
 import logging
 from base_parser import BaseParser
-from enhanced_ocr_service import enhanced_ocr_service
+from services.enhanced_ocr_service import enhanced_ocr_service
 from intelligent_parser import intelligent_parser
 # import ollama  # Отключено для стабильной версии
 

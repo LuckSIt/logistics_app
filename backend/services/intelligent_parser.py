@@ -10,7 +10,7 @@ from datetime import datetime, date
 import json
 import traceback
 
-from enhanced_ocr_service import enhanced_ocr_service
+from services.enhanced_ocr_service import enhanced_ocr_service
 import models, schemas
 from database import SessionLocal
 

@@ -6,7 +6,7 @@
 
 import re
 from typing import Dict, List, Optional, Any
-from adaptive_analyzer import analyze_tariff_text_adaptive
+from services.adaptive_analyzer import analyze_tariff_text_adaptive
 
 class RailwayAnalyzer:
     """Специализированный анализатор для железнодорожных тарифов."""

@@ -2,7 +2,7 @@
 Сервис для адаптивного анализа текста и извлечения данных тарифа.
 """
 
-from adaptive_analyzer import analyze_tariff_text_adaptive
+from services.adaptive_analyzer import analyze_tariff_text_adaptive
 
 def analyze_tariff_text(text: str):
     """
