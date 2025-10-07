@@ -32,12 +32,18 @@ RUN pip install --no-cache-dir --timeout=600 --retries=5 -r requirements.txt
 # Копируем код backend
 COPY backend/ .
 
-# Копируем фирменный бланк (если существует)
-RUN mkdir -p /app/static
-COPY frontend/public/blank.pdf ./static/blank.pdf 2>/dev/null || echo "blank.pdf not found, skipping"
+# Создаем необходимые директории  
+RUN mkdir -p uploaded_files generated_docs data models_cache static
 
-# Создаем необходимые директории
-RUN mkdir -p uploaded_files generated_docs data models_cache
+# Копируем фирменный бланк если он существует в контексте сборки
+# Используем двухэтапное копирование: сначала во временную папку, потом проверяем
+COPY frontend/public/ /tmp/frontend_public/ 
+RUN if [ -f /tmp/frontend_public/blank.pdf ]; then \
+        cp /tmp/frontend_public/blank.pdf ./static/blank.pdf && \
+        echo "✓ blank.pdf скопирован"; \
+    else \
+        echo "⚠ blank.pdf не найден, пропускаем"; \
+    fi && rm -rf /tmp/frontend_public
 
 # Устанавливаем переменные окружения
 ENV PYTHONPATH=/app
