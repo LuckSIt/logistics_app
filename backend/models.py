@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Enum, Float, Boolean, Date, DateTime, ForeignKey, Text, JSON as JSONType
-from database import Base
+from .database import Base
 import enum
 from datetime import datetime
 
@@ -36,6 +36,7 @@ class User(Base):
     phone = Column(String, nullable=True)
     company_name = Column(String, nullable=True)  # Наименование компании
     responsible_person = Column(String, nullable=True)  # Ответственное лицо
+    is_active = Column(Boolean, default=True)  # Активен ли пользователь
     created_at = Column(DateTime, default=datetime.utcnow)
 
 

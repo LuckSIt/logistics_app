@@ -12,8 +12,8 @@ from passlib.context import CryptContext
 # Добавляем текущую директорию в путь
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from database import Base, engine
-import models
+from .database import Base, engine
+from . import models
 
 # Создаем контекст для хеширования паролей
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -43,7 +43,7 @@ def create_admin_user():
             username="admin",
             full_name="Администратор системы",
             email="admin@veres-tariff.ru",
-            hashed_password=pwd_context.hash("admin123"),
+            password_hash=pwd_context.hash("admin123"),
             role=models.UserRole.admin,
             is_active=True,
             company_name="Верес-Тариф"
@@ -105,7 +105,7 @@ def create_demo_users():
                 username=user_data["username"],
                 full_name=user_data["full_name"],
                 email=user_data["email"],
-                hashed_password=pwd_context.hash(user_data["password"]),
+                password_hash=pwd_context.hash(user_data["password"]),
                 role=user_data["role"],
                 is_active=True,
                 company_name=user_data["company_name"]

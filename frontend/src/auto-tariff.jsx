@@ -12,8 +12,8 @@ function AutoTariffPage({ token }) {
   const [extractedData, setExtractedData] = React.useState(null)
   const [message, setMessage] = React.useState('')
   const [useLLM, setUseLLM] = React.useState(false)  // Флаг для использования LLM парсера
-  const [llmModel, setLlmModel] = React.useState('mistral')  // Модель LLM
-  const [availableModels, setAvailableModels] = React.useState(['mistral'])  // Доступные модели
+  const [llmModel, setLlmModel] = React.useState('huggingface')  // Модель LLM
+  const [availableModels, setAvailableModels] = React.useState(['fallback'])  // Доступные модели
   const [supportedFormats, setSupportedFormats] = React.useState([])
   const [selectedTransport, setSelectedTransport] = React.useState(null)
   const [showCreateSupplier, setShowCreateSupplier] = React.useState(false)
@@ -33,14 +33,16 @@ function AutoTariffPage({ token }) {
 
   const loadAvailableModels = async () => {
     try {
-      const response = await axios.get('/llm-parser/models', {
+      const response = await axios.get('/huggingface-llm/status', {
         baseURL: API_BASE,
         headers: { Authorization: `Bearer ${token}` }
       })
-      setAvailableModels(response.data.available_models || ['mistral'])
+      // Извлекаем модели из статуса Hugging Face LLM
+      const models = response.data.llm_available ? ['huggingface'] : ['fallback']
+      setAvailableModels(models)
     } catch (error) {
       console.error('Ошибка загрузки моделей:', error)
-      setAvailableModels(['mistral'])
+      setAvailableModels(['fallback'])
     }
   }
 
@@ -156,7 +158,7 @@ function AutoTariffPage({ token }) {
       }
 
       // Выбираем эндпоинт в зависимости от типа парсера
-      const endpoint = useLLM ? '/llm-parser/upload' : '/auto-tariff/extract-tariff-data'
+      const endpoint = useLLM ? '/huggingface-llm/upload' : '/auto-tariff/extract-tariff-data'
 
       const response = await axios.post(endpoint, formData, {
         baseURL: API_BASE,
@@ -170,16 +172,20 @@ function AutoTariffPage({ token }) {
       
       // Обрабатываем ответ в зависимости от типа парсера
       if (useLLM) {
-        // LLM парсер возвращает данные в другом формате
-        const llmData = {
-          tariff_data: {
-            transport_type: transportType,
-            basis: 'EXW',
-            routes: response.data.data || []
+        // Hugging Face LLM парсер возвращает данные в формате response.data.data
+        if (response.data.success) {
+          const llmData = {
+            tariff_data: {
+              transport_type: transportType,
+              basis: response.data.data.basis || 'EXW',
+              routes: [response.data.data] // Преобразуем в массив для совместимости
+            }
           }
+          setExtractedData(llmData)
+          setMessage(`Hugging Face LLM успешно извлек данные: ${response.data.message}`)
+        } else {
+          setMessage(`Ошибка LLM: ${response.data.message}`)
         }
-        setExtractedData(llmData)
-        setMessage(`LLM (${llmModel}) успешно извлек ${response.data.parsed_rows} записей из файла`)
       } else {
         setExtractedData(response.data)
         setMessage('Данные успешно извлечены из файла')

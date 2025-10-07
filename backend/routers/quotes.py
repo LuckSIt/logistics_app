@@ -1,11 +1,11 @@
 from typing import List
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from database import SessionLocal
-import models, schemas
-from services.security import get_current_user, can_choose_transport, can_download_kp
-from services import cbr
-from services.tariff_archive import TariffArchiveService
+from ..database import SessionLocal
+from .. import models, schemas
+from ..services.security import get_current_user, can_choose_transport, can_download_kp
+from ..services import cbr
+from ..services.tariff_archive import TariffArchiveService
 
 router = APIRouter()
 
@@ -161,7 +161,7 @@ def calculate_quote(request: schemas.CalculateRequest, current: models.User = De
                 precarriage_cost=aux_costs.get('precarriage', 0),
             )
         )
-    
+
     # Обрабатываем архивные тарифы (если активных мало)
     for archived_tariff in archived_tariffs[:5]:  # Берем только первые 5 архивных тарифов
         supplier = suppliers.get(archived_tariff.supplier_id)

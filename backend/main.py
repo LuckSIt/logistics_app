@@ -2,10 +2,10 @@ import os
 import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import users  # импортируем router
-from routers import auth, contractors, files, quotes, tariffs, reference, offers, currency, requests_history, discounts, text_extraction, auto_tariff, llm_parser, markups, request_history, stats
-from database import Base, engine
-import models
+from .routers import users  # импортируем router
+from .routers import auth, contractors, files, quotes, tariffs, reference, offers, currency, requests_history, discounts, text_extraction, auto_tariff, llm_parser, markups, request_history, stats, enhanced_ocr, context_llm_parser, huggingface_llm_parser
+from .database import Base, engine
+from . import models
 
 # Настройка логирования
 logging.basicConfig(
@@ -50,8 +50,15 @@ app.include_router(llm_parser.router, prefix="/llm-parser", tags=["LLM Parser"])
 app.include_router(markups.router, prefix="/markups", tags=["Markups"])
 app.include_router(request_history.router, prefix="/request-history", tags=["Request History"])
 app.include_router(stats.router, prefix="/stats", tags=["Statistics"])
+app.include_router(enhanced_ocr.router, prefix="/enhanced-ocr", tags=["Enhanced OCR"])
+app.include_router(context_llm_parser.router, prefix="/context-llm", tags=["Context LLM Parser"])
+app.include_router(huggingface_llm_parser.router, prefix="/huggingface-llm", tags=["Hugging Face LLM Parser"])
 
 
 @app.get("/")
 def root():
     return {"message": "Верес-Тариф backend работает"}
+
+@app.get("/health")
+def health_check():
+    return {"status": "healthy", "message": "Backend работает нормально"}

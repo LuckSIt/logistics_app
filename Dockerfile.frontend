@@ -1,6 +1,9 @@
 # Dockerfile для frontend (React)
 FROM node:18-alpine
 
+# Устанавливаем curl для healthcheck
+RUN apk add --no-cache curl
+
 # Создаем рабочую директорию
 WORKDIR /app
 

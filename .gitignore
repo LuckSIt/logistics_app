@@ -9,8 +9,16 @@ backend/generated_docs/
 backend/*.db
 backend/*.sqlite
 backend/uploads/
+backend/uploaded_files/
 .env
 *.log
+
+# Кэш и временные файлы
+models_cache/
+generated_docs/
+data/
+*.db
+uploaded_files/
 
 # Node/Vite
 frontend/node_modules/
@@ -23,3 +31,6 @@ frontend/.env.*
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Временные файлы
+-la

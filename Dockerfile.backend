@@ -5,6 +5,10 @@ FROM python:3.11-slim
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
+    curl \
+    tesseract-ocr \
+    tesseract-ocr-rus \
+    wget \
     && rm -rf /var/lib/apt/lists/*
 
 # Создаем рабочую директорию
@@ -13,11 +17,22 @@ WORKDIR /app
 # Копируем requirements.txt
 COPY backend/requirements.txt .
 
-# Устанавливаем Python зависимости
-RUN pip install --no-cache-dir -r requirements.txt
+# Устанавливаем Python зависимости с таймаутами и ретраями
+RUN pip install --no-cache-dir --timeout=300 --retries=3 -r requirements.txt
+
+# Дополнительные зависимости для стабильности
+RUN pip install --no-cache-dir --timeout=300 --retries=3 \
+    wheel \
+    setuptools \
+    pip-tools
+
+# Ollama отключен для стабильной версии
 
 # Копируем код backend
 COPY backend/ .
+
+# Копируем фирменный бланк
+COPY frontend/public/blank.pdf ./blank.pdf
 
 # Создаем необходимые директории
 RUN mkdir -p uploaded_files generated_docs data
@@ -31,6 +46,8 @@ EXPOSE 8000
 # Создаем скрипт запуска
 RUN echo '#!/bin/bash\n\
 echo "🚀 Запуск Верес-Тариф Backend"\n\
+echo "Обновление схемы базы данных..."\n\
+python update_db_schema.py\n\
 echo "Инициализация базы данных..."\n\
 python init_db.py\n\
 echo "Запуск сервера..."\n\

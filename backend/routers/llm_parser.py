@@ -3,11 +3,11 @@ import logging
 from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Form
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from database import SessionLocal
-import models, schemas
-from services.security import get_current_user
-from services.llm_parser import LLMTariffParser
-from services import cbr
+from ..database import SessionLocal
+from .. import models, schemas
+from ..services.security import get_current_user
+from ..services.llm_parser import LLMTariffParser
+from ..services import cbr
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ async def upload_with_llm_parser(
     transport_type: str = Form("auto"),
     model: str = Form("mistral"),  # Модель Ollama
     db: Session = Depends(get_db),
-    _: models.User = Depends(get_current_user),
+    current_user: models.User = Depends(get_current_user),
 ):
     """
     Загрузка и парсинг файлов тарифов с помощью LLM (Ollama)
@@ -71,9 +71,16 @@ async def upload_with_llm_parser(
         
         if not rows:
             logger.warning(f"LLM не смог извлечь данные из файла {file.filename}")
-            raise HTTPException(
-                status_code=400, 
-                detail="LLM не смог распознать данные из файла. Попробуйте другой файл или проверьте его содержимое."
+            # Возвращаем пустой результат вместо ошибки
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "message": "LLM не смог распознать данные из файла. Попробуйте другой файл или используйте обычный парсер.",
+                    "success": False,
+                    "data": [],
+                    "supplier_name": supplier.name,
+                    "file_name": file.filename
+                }
             )
         
         # Конвертируем валюту если нужно
@@ -211,7 +218,7 @@ async def parse_text_with_llm(
     transport_type: str = Form("auto"),
     model: str = Form("mistral"),
     db: Session = Depends(get_db),
-    _: models.User = Depends(get_current_user),
+    current_user: models.User = Depends(get_current_user),
 ):
     """
     Парсинг текста с помощью LLM без загрузки файла
@@ -239,9 +246,13 @@ async def parse_text_with_llm(
         logger.info(f"LLM парсинг текста завершен. Извлечено {len(rows)} записей")
         
         if not rows:
-            raise HTTPException(
-                status_code=400, 
-                detail="LLM не смог извлечь данные из текста. Попробуйте другой текст."
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "message": "LLM не смог извлечь данные из текста. Попробуйте другой текст или используйте обычный парсер.",
+                    "success": False,
+                    "data": []
+                }
             )
         
         # Конвертируем валюту если нужно
@@ -275,21 +286,17 @@ async def get_available_models():
     Получение списка доступных моделей Ollama
     """
     try:
-        import ollama
-        
-        # Получаем список моделей
-        models_list = ollama.list()
-        available_models = [model['name'] for model in models_list.get('models', [])]
-        
+        # LLM функционал отключен для стабильной версии
         return {
-            "available_models": available_models,
-            "default_model": "mistral"
+            "available_models": [],
+            "default_model": "mistral",
+            "message": "LLM функционал отключен для стабильной версии"
         }
         
     except Exception as e:
         logger.error(f"Ошибка получения списка моделей: {e}")
         return {
-            "available_models": ["mistral"],
+            "available_models": [],
             "default_model": "mistral",
-            "error": "Не удалось получить список моделей Ollama"
+            "error": "LLM функционал отключен для стабильной версии"
         }

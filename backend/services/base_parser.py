@@ -22,6 +22,54 @@ class BaseParser(ABC):
         Должен быть реализован в каждом специализированном парсере
         """
         pass
+
+    def parse_text_direct(self, text: str) -> Dict[str, Any]:
+        """
+        Парсинг текста напрямую (без файла)
+        Реализация по умолчанию использует базовые паттерны
+        """
+        try:
+            # Очищаем текст
+            cleaned_text = self.clean_text(text)
+
+            # Используем базовые паттерны для извлечения данных
+            data = {}
+
+            # Паттерны для извлечения данных
+            patterns = {
+                'origin_city': r'(?:от|из|откуда|origin|departure)[\s:]*([А-Яа-я\w\s\-]+)',
+                'destination_city': r'(?:до|в|куда|destination|arrival)[\s:]*([А-Яа-я\w\s\-]+)',
+                'price_rub': r'(\d+(?:[.,]\d+)?)\s*(?:руб|рубл|₽|RUB)',
+                'price_usd': r'(\d+(?:[.,]\d+)?)\s*(?:долл|\$|USD)',
+                'price_eur': r'(\d+(?:[.,]\d+)?)\s*(?:евро|€|EUR)',
+                'transit_time_days': r'(\d+)\s*(?:дней|дня|день|days)',
+                'basis': r'(EXW|FCA|FOB|CIF|CFR|DAP|DDP)',
+                'weight_kg': r'(\d+(?:[.,]\d+)?)\s*(?:кг|kg|тонн)',
+                'volume_m3': r'(\d+(?:[.,]\d+)?)\s*(?:м³|m3|cbm)'
+            }
+
+            for field, pattern in patterns.items():
+                matches = re.findall(pattern, cleaned_text, re.IGNORECASE)
+                if matches:
+                    data[field] = matches[0].strip()
+
+            # Если не нашли маршрут отдельно, попробуем найти города
+            if 'origin_city' not in data or 'destination_city' not in data:
+                cities = re.findall(r'\b[A-ZА-Я][a-zа-я]+(?:\s+[A-ZА-Я][a-zа-я]+)*\b', cleaned_text)
+                cities = [city for city in cities if len(city) > 2]
+                if len(cities) >= 2:
+                    data['origin_city'] = cities[0]
+                    data['destination_city'] = cities[-1]
+
+            # Добавляем метаданные
+            data['parsed_at'] = datetime.now().isoformat()
+            data['parsing_method'] = 'direct_text_parsing'
+
+            return data
+
+        except Exception as e:
+            logger.error(f"Ошибка парсинга текста: {e}")
+            return {}
     
     def extract_text_from_file(self, file_path: str) -> str:
         """

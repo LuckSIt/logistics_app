@@ -30,7 +30,7 @@ try:
     _pdfdoc.md5 = _safe_md5  # ignore unsupported usedforsecurity kwarg
 except Exception:
     pass
-from schemas import CalculateOption
+from ..schemas import CalculateOption
 
 
 def _get_value(opt: Any, key: str, default=None):
@@ -93,8 +93,8 @@ def generate_pdf(options: List[CalculateOption], output_path: str, request_data:
     if dir_path:
         os.makedirs(dir_path, exist_ok=True)
     
-    # Путь к фирменному бланку
-    blank_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "frontend", "public", "blank.pdf")
+    # Путь к фирменному бланку (в контейнере)
+    blank_path = os.path.join(os.path.dirname(__file__), "..", "blank.pdf")
     
     # Проверяем наличие бланка
     if os.path.exists(blank_path):
@@ -526,18 +526,18 @@ def _build_commercial_proposal_paragraphs(req: Dict[str, Any], opt: Dict[str, An
         logger.info(f"Генерируем КП для {transport_type} с базисом {basis}")
         logger.info(f"Данные запроса: {req}")
         logger.info(f"Данные тарифа: {opt}")
-
+        
         # Используем новый менеджер шаблонов
         from .kp_templates import kp_template_manager
-
+        
         # Генерируем текст КП на основе шаблона
         kp_text = kp_template_manager.generate_kp_text(transport_type, basis, req, opt)
         logger.info(f"Сгенерированный текст КП: {kp_text[:200]}...")
-
+        
         # Разбиваем на параграфы
         paragraphs = [p.strip() for p in kp_text.split('\n') if p.strip()]
         logger.info(f"Получено параграфов: {len(paragraphs)}")
-
+        
         return paragraphs
 
     except Exception as e:

@@ -8,12 +8,12 @@ from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Form
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
-from database import SessionLocal
-import models, schemas
-from services.security import get_current_user
-from services.text_extractor import extract_text_from_file, get_supported_formats, is_format_supported
-from services.adaptive_analyzer import analyze_tariff_text_adaptive
-from services.enhanced_aviation_analyzer import analyze_aviation_file_enhanced
+from ..database import SessionLocal
+from .. import models, schemas
+from ..services.security import get_current_user
+from ..services.text_extractor import extract_text_from_file, get_supported_formats, is_format_supported
+from ..services.adaptive_analyzer import analyze_tariff_text_adaptive
+from ..services.enhanced_aviation_analyzer import analyze_aviation_file_enhanced
 # LLM анализатор удален
 
 logger = logging.getLogger(__name__)
@@ -106,11 +106,11 @@ async def extract_tariff_data_from_file(
         try:
             if transport_type == "auto":
                 # Автоматическое определение типа транспорта
-                from services.parser_factory import ParserFactory
+                from ..services.parser_factory import ParserFactory
                 extracted_data = ParserFactory.parse_with_auto_detection(save_path, supplier_id)
             else:
                 # Используем специализированный парсер
-                from services.parser_factory import ParserFactory
+                from ..services.parser_factory import ParserFactory
                 try:
                     parser = ParserFactory.get_parser(transport_type)
                     extracted_data = parser.parse_tariff_data(save_path, supplier_id)
@@ -142,7 +142,7 @@ async def extract_tariff_data_from_file(
                 except ValueError as e:
                     logger.warning(f"Парсер для типа {transport_type} не найден, используем автоопределение: {e}")
                     # Fallback к автоопределению
-                    from services.parser_factory import ParserFactory
+                    from ..services.parser_factory import ParserFactory
                     extracted_data = ParserFactory.parse_with_auto_detection(save_path, supplier_id)
             
             logger.info(f"Анализ успешен, найдено маршрутов: {len(extracted_data.get('routes', []))}")
@@ -150,7 +150,11 @@ async def extract_tariff_data_from_file(
         except Exception as e:
             logger.error(f"Ошибка анализа: {e}, используем fallback")
             # Fallback к старому методу
-            extracted_data = analyze_tariff_text_adaptive(result["text"])
+            try:
+                extracted_data = analyze_tariff_text_adaptive(result.get("text", ""))
+            except Exception as fallback_error:
+                logger.error(f"Fallback также не сработал: {fallback_error}")
+                extracted_data = {"routes": [], "error": str(fallback_error)}
         
         # Формируем ответ с данными для формы
         response = {

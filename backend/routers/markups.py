@@ -1,9 +1,9 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from database import SessionLocal
-import models, schemas
-from services.security import can_set_markups
+from ..database import SessionLocal
+from .. import models, schemas
+from ..services.security import can_set_markups
 
 router = APIRouter()
 

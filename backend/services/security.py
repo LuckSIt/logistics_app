@@ -8,8 +8,8 @@ from jose import jwt, JWTError
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
-from database import SessionLocal
-import models
+from ..database import SessionLocal
+from .. import models
 
 
 SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-change-me")

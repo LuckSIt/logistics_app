@@ -8,7 +8,7 @@ import re
 import os
 from typing import Dict, List, Optional, Any
 from services.enhanced_aviation_analyzer import analyze_aviation_file_enhanced
-from services.adaptive_analyzer import analyze_tariff_text_adaptive
+from .adaptive_analyzer import analyze_tariff_text_adaptive
 from services.railway_analyzer import analyze_railway_file
 from services.air_analyzer import analyze_air_file
 from services.sea_analyzer import analyze_sea_file

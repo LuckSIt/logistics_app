@@ -1,9 +1,9 @@
 from typing import List
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from database import SessionLocal
-import models, schemas
-from services.security import get_current_user
+from ..database import SessionLocal
+from .. import models, schemas
+from ..services.security import get_current_user
 
 router = APIRouter()
 

@@ -7,9 +7,9 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import func, and_
 from datetime import datetime, timedelta
-from database import SessionLocal
-import models
-from services.security import get_current_user
+from ..database import SessionLocal
+from .. import models
+from ..services.security import get_current_user
 
 router = APIRouter()
 

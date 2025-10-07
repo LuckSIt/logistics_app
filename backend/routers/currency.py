@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Query
 from datetime import date
 from typing import Optional
-from services.cbr import (
+from ..services.cbr import (
     get_latest_rates, 
     get_historical_rates, 
     convert_currency,

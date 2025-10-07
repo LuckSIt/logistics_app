@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Тестирование HuggingFace LLM</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-case { border: 1px solid #ddd; margin: 10px 0; padding: 15px; }
+        .result { margin-top: 10px; padding: 10px; background: #f5f5f5; }
+        textarea { width: 100%; height: 100px; }
+        button { padding: 10px 20px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🧠 Тестирование Гибридного Парсера (Парсер + LLM)</h1>
+    <p>Этот тест показывает комбинированный подход: сначала парсер извлекает базовые данные, затем LLM улучшает распознавание контекста.</p>
+
+    <div class="test-case">
+        <h3>Тест 1: Автоперевозки (Парсер + LLM)</h3>
+        <textarea id="test1">Тариф автоперевозок: Москва - Санкт-Петербург, цена 15000 рублей, срок 3 дня, базис EXW</textarea><br>
+        <button onclick="testParse('test1', 'auto')">Протестировать</button>
+        <div class="result" id="result1"></div>
+    </div>
+
+    <div class="test-case">
+        <h3>Тест 2: Авиаперевозки (Парсер + LLM)</h3>
+        <textarea id="test2">AIRLINE: MU D1357+D2, ROUTE: HKG-XIY-SVO1, Rate: 8.90 USD/kg MIN Q45, Transit: 7 days, FOB</textarea><br>
+        <button onclick="testParse('test2', 'air')">Протестировать</button>
+        <div class="result" id="result2"></div>
+    </div>
+
+    <div class="test-case">
+        <h3>Тест 3: Морские перевозки (Парсер + LLM)</h3>
+        <textarea id="test3">Sea freight: Shenzhen - St. Petersburg, 20ft container 3500 USD, transit 25 days, CIF</textarea><br>
+        <button onclick="testParse('test3', 'sea')">Протестировать</button>
+        <div class="result" id="result3"></div>
+    </div>
+
+    <div class="test-case">
+        <h3>Тест 4: TIR таблица (Парсер + LLM)</h3>
+        <textarea id="test4">TIR Tianjin Qingdao Shanghai Ningbo Guangzhou Shenzhen Manzhouli Moscow 11500 11500 11850 11850 12550 12550</textarea><br>
+        <button onclick="testParse('test4', 'auto')">Протестировать</button>
+        <div class="result" id="result4"></div>
+    </div>
+
+
+    <div class="test-case">
+        <h3>Тест 3: Морские перевозки</h3>
+        <textarea id="test3">Sea freight: Shenzhen - St. Petersburg, 20ft container 3500 USD, transit 25 days, CIF</textarea><br>
+        <button onclick="testParse('test3', 'sea')">Протестировать</button>
+        <div class="result" id="result3"></div>
+    </div>
+
+    <div class="test-case">
+        <h3>Тест 4: TIR таблица</h3>
+        <textarea id="test4">TIR Tianjin Qingdao Shanghai Ningbo Guangzhou Shenzhen Manzhouli Moscow 11500 11500 11850 11850 12550 12550</textarea><br>
+        <button onclick="testParse('test4', 'auto')">Протестировать</button>
+        <div class="result" id="result4"></div>
+    </div>
+
+    <script>
+        async function getToken() {
+            const response = await fetch('http://127.0.0.1:8000/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'username=admin&password=admin123'
+            });
+            const data = await response.json();
+            return data.access_token;
+        }
+
+        async function testParse(textareaId, transportType) {
+            const text = document.getElementById(textareaId).value;
+            const resultDiv = document.getElementById('result' + textareaId.replace('test', ''));
+
+            resultDiv.innerHTML = '⏳ Анализируем...';
+
+            try {
+                const token = await getToken();
+
+                const response = await fetch('http://127.0.0.1:8000/huggingface-llm/parse-text', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        transport_type: transportType,
+                        supplier_name: 'Тестовый поставщик'
+                    })
+                });
+
+                const result = await response.json();
+
+                resultDiv.innerHTML = `
+                    <h4>Результат:</h4>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<span style="color: red">Ошибка: ${error.message}</span>`;
+            }
+        }
+    </script>
+</body>
+</html>
