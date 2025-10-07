@@ -8,6 +8,12 @@ RUN apt-get update && apt-get install -y \
     curl \
     tesseract-ocr \
     tesseract-ocr-rus \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libgomp1 \
     wget \
     && rm -rf /var/lib/apt/lists/*
 
@@ -17,42 +23,45 @@ WORKDIR /app
 # Копируем requirements.txt
 COPY backend/requirements.txt .
 
+# Обновляем pip
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel
+
 # Устанавливаем Python зависимости с таймаутами и ретраями
-RUN pip install --no-cache-dir --timeout=300 --retries=3 -r requirements.txt
-
-# Дополнительные зависимости для стабильности
-RUN pip install --no-cache-dir --timeout=300 --retries=3 \
-    wheel \
-    setuptools \
-    pip-tools
-
-# Ollama отключен для стабильной версии
+RUN pip install --no-cache-dir --timeout=600 --retries=5 -r requirements.txt
 
 # Копируем код backend
 COPY backend/ .
 
-# Копируем фирменный бланк
-COPY frontend/public/blank.pdf ./blank.pdf
+# Копируем фирменный бланк (если существует)
+RUN mkdir -p /app/static
+COPY frontend/public/blank.pdf ./static/blank.pdf 2>/dev/null || echo "blank.pdf not found, skipping"
 
 # Создаем необходимые директории
-RUN mkdir -p uploaded_files generated_docs data
+RUN mkdir -p uploaded_files generated_docs data models_cache
 
-# Устанавливаем PYTHONPATH
+# Устанавливаем переменные окружения
 ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
+ENV PORT=8000
 
 # Открываем порт
 EXPOSE 8000
 
 # Создаем скрипт запуска
 RUN echo '#!/bin/bash\n\
+set -e\n\
 echo "🚀 Запуск Верес-Тариф Backend"\n\
 echo "Обновление схемы базы данных..."\n\
-python update_db_schema.py\n\
+python update_db_schema.py || echo "Schema update skipped"\n\
 echo "Инициализация базы данных..."\n\
-python init_db.py\n\
-echo "Запуск сервера..."\n\
-uvicorn main:app --host 0.0.0.0 --port 8000\n\
+python init_db.py || echo "DB init skipped"\n\
+echo "Запуск сервера на порту ${PORT:-8000}..."\n\
+exec uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}\n\
 ' > /app/start.sh && chmod +x /app/start.sh
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:${PORT:-8000}/health || exit 1
 
 # Команда запуска
 CMD ["/app/start.sh"]

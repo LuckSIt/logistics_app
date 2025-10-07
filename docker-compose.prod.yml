@@ -1,40 +1,79 @@
+version: '3.8'
+
 services:
   backend:
     build:
       context: .
       dockerfile: Dockerfile.backend
-    container_name: veres-backend
+    container_name: veres-backend-prod
     ports:
       - "8000:8000"
     volumes:
-      - ./data:/app/data
-      - ./uploaded_files:/app/uploaded_files
-      - ./generated_docs:/app/generated_docs
+      - veres-data:/app/data
+      - veres-uploads:/app/uploaded_files
+      - veres-docs:/app/generated_docs
+      - veres-models:/app/models_cache
     environment:
       - PYTHONPATH=/app
-      - ENVIRONMENT=production
-    restart: unless-stopped
+      - PYTHONUNBUFFERED=1
+      - PORT=8000
+      - DATABASE_URL=sqlite:///./data/veres.db
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=False
+      - LOG_LEVEL=INFO
+    restart: always
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 5
+      start_period: 90s
+    networks:
+      - veres-prod-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   frontend:
     build:
       context: .
       dockerfile: Dockerfile.frontend
-    container_name: veres-frontend
+    container_name: veres-frontend-prod
     ports:
-      - "80:3000"
+      - "80:80"
+      - "443:443"
     depends_on:
-      - backend
-    restart: unless-stopped
+      backend:
+        condition: service_healthy
+    environment:
+      - VITE_API_URL=${BACKEND_URL:-http://localhost:8000}
+    restart: always
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      test: ["CMD", "curl", "-f", "http://localhost/"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 30s
+    networks:
+      - veres-prod-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  veres-prod-network:
+    driver: bridge
 
 volumes:
-  data:
+  veres-data:
+    driver: local
+  veres-uploads:
+    driver: local
+  veres-docs:
+    driver: local
+  veres-models:
+    driver: local
