@@ -39,7 +39,10 @@ class EnhancedOCRService:
     
     def __init__(self):
         self.setup_tesseract()
-        self.setup_easyocr()
+        # НЕ инициализируем EasyOCR сразу - это требует много памяти!
+        # Будет инициализирован при первом использовании (lazy loading)
+        self.easyocr_reader = None
+        self._easyocr_initialized = False
         
         # Шаблоны для распознавания структурированных данных
         self.template_patterns = self._load_template_patterns()
@@ -65,16 +68,23 @@ class EnhancedOCRService:
         else:
             logger.warning("Tesseract не найден. OCR будет недоступен.")
     
-    def setup_easyocr(self):
-        """Настройка EasyOCR"""
+    def _lazy_init_easyocr(self):
+        """Ленивая инициализация EasyOCR - загружается только при первом использовании"""
+        if self._easyocr_initialized:
+            return
+        
+        self._easyocr_initialized = True
+        
         if EASYOCR_AVAILABLE:
             try:
+                logger.info("Инициализация EasyOCR (это может занять время)...")
                 self.easyocr_reader = easyocr.Reader(['ru', 'en'], gpu=False)
                 logger.info("EasyOCR инициализирован успешно")
             except Exception as e:
-                logger.warning(f"Не удалось инициализировать EasyOCR: {e}")
+                logger.warning(f"Не удалось инициализировать EasyOCR: {e}. Используем только Tesseract.")
                 self.easyocr_reader = None
         else:
+            logger.info("EasyOCR не доступен, используем только Tesseract")
             self.easyocr_reader = None
     
     def _load_template_patterns(self) -> Dict[str, Dict[str, str]]:
@@ -232,11 +242,18 @@ class EnhancedOCRService:
             if tesseract_text:
                 texts.append(('tesseract', tesseract_text))
             
-            # 2. EasyOCR если доступен
-            if self.easyocr_reader:
-                easyocr_text = self._ocr_with_easyocr(image)
-                if easyocr_text:
-                    texts.append(('easyocr', easyocr_text))
+            # 2. EasyOCR если доступен (ленивая загрузка)
+            # Отключено по умолчанию для экономии памяти на Render Free tier
+            # Раскомментируйте если используете платный план с достаточной памятью
+            # if not self._easyocr_initialized and EASYOCR_AVAILABLE:
+            #     use_easyocr = os.getenv('USE_EASYOCR', 'false').lower() == 'true'
+            #     if use_easyocr:
+            #         self._lazy_init_easyocr()
+            # 
+            # if self.easyocr_reader:
+            #     easyocr_text = self._ocr_with_easyocr(image)
+            #     if easyocr_text:
+            #         texts.append(('easyocr', easyocr_text))
             
             # 3. Выбираем лучший результат
             if texts:
