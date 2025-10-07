@@ -8,7 +8,7 @@ import re
 import logging
 from typing import List, Dict, Any, Optional
 from services.base_parser import BaseParser
-from sea_analyzer import SeaAnalyzer
+from services.sea_analyzer import SeaAnalyzer
 
 logger = logging.getLogger(__name__)
 

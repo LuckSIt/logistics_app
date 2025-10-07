@@ -1,11 +1,11 @@
 from typing import Dict, Type
 from services.base_parser import BaseParser
-from auto_parser import AutoParser
-from railway_parser import RailwayParser
-from sea_parser import SeaParser
-from air_parser import AirParser
-from multimodal_parser import MultimodalParser
-from llm_parser import LLMTariffParser
+from services.auto_parser import AutoParser
+from services.railway_parser import RailwayParser
+from services.sea_parser import SeaParser
+from services.air_parser import AirParser
+from services.multimodal_parser import MultimodalParser
+from services.llm_parser import LLMTariffParser
 
 class ParserFactory:
     """

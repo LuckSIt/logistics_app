@@ -8,7 +8,7 @@ import re
 import logging
 from typing import List, Dict, Any, Optional
 from services.base_parser import BaseParser
-from railway_analyzer import RailwayAnalyzer
+from services.railway_analyzer import RailwayAnalyzer
 
 logger = logging.getLogger(__name__)
 

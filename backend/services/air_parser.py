@@ -8,7 +8,7 @@ import re
 import logging
 from typing import List, Dict, Any, Optional
 from services.base_parser import BaseParser
-from air_analyzer import AirAnalyzer
+from services.air_analyzer import AirAnalyzer
 
 logger = logging.getLogger(__name__)
 
