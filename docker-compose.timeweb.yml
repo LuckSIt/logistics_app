@@ -37,14 +37,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.frontend
+      args:
+        VITE_API_URL: https://api-kindplate.ru
     container_name: veres-frontend
     ports:
       - "8002:80"  # Внешний порт 8002 вместо 80
     depends_on:
       veres-backend:
         condition: service_healthy
-    environment:
-      - VITE_API_URL=https://api-kindplate.ru
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/"]
