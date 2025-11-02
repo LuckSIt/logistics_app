@@ -1,6 +1,7 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from database import SessionLocal
 import models, schemas
 from services.security import can_view_request_history
@@ -52,21 +53,21 @@ def get_request_stats(_: models.User = Depends(can_view_request_history), db: Se
     user_stats = db.query(
         models.User.full_name,
         models.User.role,
-        db.func.count(models.Request.id).label('request_count')
+        func.count(models.Request.id).label('request_count')
     ).join(models.Request, models.User.id == models.Request.user_id)\
      .group_by(models.User.id, models.User.full_name, models.User.role)\
-     .order_by(db.func.count(models.Request.id).desc()).all()
+     .order_by(func.count(models.Request.id).desc()).all()
     
     # Статистика по дням (последние 30 дней)
     from datetime import datetime, timedelta
     thirty_days_ago = datetime.utcnow() - timedelta(days=30)
     
     daily_stats = db.query(
-        db.func.date(models.Request.created_at).label('date'),
-        db.func.count(models.Request.id).label('count')
+        func.date(models.Request.created_at).label('date'),
+        func.count(models.Request.id).label('count')
     ).filter(models.Request.created_at >= thirty_days_ago)\
-     .group_by(db.func.date(models.Request.created_at))\
-     .order_by(db.func.date(models.Request.created_at)).all()
+     .group_by(func.date(models.Request.created_at))\
+     .order_by(func.date(models.Request.created_at)).all()
     
     return {
         "total_requests": total_requests,

@@ -60,3 +60,7 @@ start http://localhost
 echo Нажмите любую клавишу для выхода...
 pause >nul
 
+
+
+
+

@@ -1,8 +1,17 @@
 # Python
 .venv/
+venv/
+env/
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
 
 # FastAPI/локальные файлы
 backend/generated_docs/
@@ -11,13 +20,14 @@ backend/*.sqlite
 backend/uploads/
 backend/uploaded_files/
 .env
+.env.local
 *.log
 
 # Кэш и временные файлы
 models_cache/
 generated_docs/
-data/
-*.db
+data/*.db
+data/*.sqlite
 uploaded_files/
 
 # Node/Vite
@@ -31,6 +41,20 @@ frontend/.env.*
 .vscode/
 .DS_Store
 Thumbs.db
+*.swp
+*.swo
+*~
 
 # Временные файлы
 -la
+*.tmp
+*.bak
+
+# Специфичные для проекта
+telegram_bot/
+
+# Сохраняем структуру папок, но не содержимое
+!data/.gitkeep
+!uploaded_files/.gitkeep
+!generated_docs/.gitkeep
+!models_cache/.gitkeep
