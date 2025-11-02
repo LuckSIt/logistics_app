@@ -14,7 +14,7 @@ import TransportSelectorPage from './transport-selector.jsx'
 import UserManagement from './components/UserManagement.jsx'
 import MarkupManagement from './components/MarkupManagement.jsx'
 
-const API_BASE = import.meta.env.VITE_API || 'http://127.0.0.1:8000'
+const API_BASE = import.meta.env.VITE_API_URL || import.meta.env.VITE_API || 'http://127.0.0.1:8000'
 axios.defaults.baseURL = API_BASE
 axios.interceptors.request.use((config) => {
   const t = localStorage.getItem('token')
